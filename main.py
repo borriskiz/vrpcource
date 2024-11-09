@@ -1,6 +1,7 @@
 import numpy as np
 import noise
 import matplotlib.pyplot as plt
+from numpy import ndarray
 
 # Параметры карты
 width = 512
@@ -14,7 +15,8 @@ lacunarity = 2.0  # Частота осцилляций
 
 
 # Генерация карты
-def generate_map(width, height, scale, octaves, persistence, lacunarity):
+def generate_map(width: int, height: int, scale: float, octaves: float, persistence: float,
+                 lacunarity: float) -> ndarray:
     map_data = np.zeros((height, width))
 
     for y in range(height):
