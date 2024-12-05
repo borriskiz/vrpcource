@@ -15,19 +15,19 @@ lacunarity = 2.0  # Частота осцилляций
 
 
 # Генерация карты
-def generate_map(width: int, height: int, scale: float, octaves: float, persistence: float,
-                 lacunarity: float) -> ndarray:
-    map_data = np.zeros((height, width))
+def generate_map(_width: int, _height: int, _scale: float, _octaves: float, _persistence: float,
+                 _lacunarity: float) -> ndarray:
+    map_data = np.zeros((_height, _width))
 
-    for y in range(height):
-        for x in range(width):
+    for y in range(_height):
+        for x in range(_width):
             # Применение перлин-шума
             map_data[y][x] = noise.pnoise2(
-                x / scale,
-                y / scale,
-                octaves=octaves,
-                persistence=persistence,
-                lacunarity=lacunarity,
+                x / _scale,
+                y / _scale,
+                octaves=_octaves,
+                persistence=_persistence,
+                lacunarity=_lacunarity,
                 repeatx=1024,
                 repeaty=1024,
                 base=42
