@@ -154,6 +154,49 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndar
     return []
 
 
+def dynamic_programming_routing(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndarray) -> List[
+    Tuple[int, int]]:
+    # Размеры карты
+    rows, cols = _terrain_map.shape
+
+    # Таблица для хранения минимальной стоимости пути
+    dp = np.full((rows, cols), float('inf'))
+    dp[_start[0], _start[1]] = 0  # Стоимость старта 0
+
+    # Таблица для восстановления пути
+    parent = np.full((rows, cols), None)
+
+    # Очередь для обхода карты (по принципу волнового алгоритма)
+    queue = [(0, _start)]  # (стоимость, точка)
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Направления движения (вверх, вниз, влево, вправо)
+
+    # Алгоритм динамического программирования
+    while queue:
+        current_cost, (x, y) = heapq.heappop(queue)
+
+        # Если достигли конечной точки, восстанавливаем путь
+        if (x, y) == _end:
+            path = []
+            while (x, y) != _start:
+                path.append((x, y))
+                x, y = parent[x, y]
+            path.append(_start)
+            return path[::-1]  # Путь в обратном порядке
+
+        # Проверяем соседей
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < rows and 0 <= ny < cols:  # Проверяем, что координаты в пределах карты
+                new_cost = current_cost + abs(_terrain_map[x, y] - _terrain_map[nx, ny])
+                if new_cost < dp[nx, ny]:  # Если нашли более дешевый путь
+                    dp[nx, ny] = new_cost
+                    parent[nx, ny] = (x, y)
+                    heapq.heappush(queue, (new_cost, (nx, ny)))
+
+    return []  # Если путь не найден
+
+
 # Функция маршрутизации методом ближайшего соседа
 def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
                              _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
