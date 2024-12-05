@@ -89,7 +89,7 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: ndarray
         # Проверка соседей (вверх, вниз, влево, вправо)
         for neighbor in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
             neighbor_pos: Tuple[int, int] = (
-            current_node.position[0] + neighbor[0], current_node.position[1] + neighbor[1])
+                current_node.position[0] + neighbor[0], current_node.position[1] + neighbor[1])
             if 0 <= neighbor_pos[0] < _terrain_map.shape[0] and 0 <= neighbor_pos[1] < _terrain_map.shape[1]:
                 if neighbor_pos in closed_list:
                     continue
@@ -106,11 +106,11 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: ndarray
 
 
 # Пример начальной и конечной точки
-start: Tuple[int, int] = (300, 300)  # Начальная точка
-end: Tuple[int, int] = (100, 100)  # Конечная точка
+start: Tuple[int, int] = (100, 300)  # Начальная точка
+end: Tuple[int, int] = (300, 100)  # Конечная точка
 
 # Поиск пути между точками
-path: Tuple[Tuple[int, int], ...] | None = a_star(start, end, terrain_map)
+path: Tuple[Tuple[int, int], ...] | None = a_star(start, end, terrain_map)  # Визуализация
 
 # Визуализация
 plt.imshow(terrain_map, cmap='terrain')
@@ -118,9 +118,26 @@ plt.colorbar()
 
 # Рисуем путь поверх карты, не изменяя исходные значения карты
 if path:
+
+    # Рисуем линии и стрелки между узлами пути
     for i in range(len(path) - 1):
         start_point: Tuple[int, int] = path[i]
         end_point: Tuple[int, int] = path[i + 1]
-        plt.plot([start_point[1], end_point[1]], [start_point[0], end_point[0]], color="red", linewidth=2)
 
+        # Рисуем линию пути
+        plt.plot([start_point[1], end_point[1]], [start_point[0], end_point[0]], color="red", linewidth=1)
+
+        if i % 30 == 0:
+            # Добавляем стрелку, уменьшаем размер и немного увеличиваем расстояние
+            plt.arrow(
+                start_point[1], start_point[0],  # Координаты начала стрелки
+                end_point[1] - start_point[1], end_point[0] - start_point[0],  # Смещение
+                head_width=4, head_length=8, fc="black", ec="black", length_includes_head=True, zorder=10
+                # Размер стрелок
+            )
+    # Выделяем начальную и конечную точки как большие точки
+    plt.scatter(start[1], start[0], color="green", s=20, zorder=20)  # Начальная точка
+    plt.scatter(end[1], end[0], color="black", s=20, zorder=20)  # Конечная точка
+
+# Показать финальный результат
 plt.show()
