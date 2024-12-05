@@ -1,7 +1,7 @@
 import random
 import numpy as np
 from typing import List, Tuple
-from paths import heuristic
+from paths import a_star_path, heuristic
 
 
 # Функция для вычисления вероятности перехода между двумя точками
@@ -9,10 +9,10 @@ def transition_probability(_pheromone: float, _distance: float, _alpha: float, _
     return (_pheromone ** _alpha) * (1.0 / _distance) ** _beta
 
 
-# Алгоритм муравьиной колонии
+# Алгоритм муравьиной колонии с учетом рельефа
 def ant_colony_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
-                       _terrain_map: np.ndarray, _num_ants: int, _num_iterations: int, _alpha: float,
-                       _beta: float, _rho: float, _q: float) -> List[Tuple[int, int]]:
+                                    _terrain_map: np.ndarray, _num_ants: int, _num_iterations: int, _alpha: float,
+                                    _beta: float, _rho: float, _q: float) -> List[Tuple[int, int]]:
     # Копируем список точек и добавляем стартовую и конечную точки, если их нет
     points = _points.copy()
     if _start not in points:
@@ -29,6 +29,7 @@ def ant_colony_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], 
     best_route = None
     best_length = float('inf')
 
+    # Алгоритм муравьиной колонии
     for iteration in range(_num_iterations):
         all_routes = []
         all_lengths = []
@@ -44,9 +45,18 @@ def ant_colony_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], 
                 probabilities = []
                 for i, point in enumerate(points):
                     if point not in route:  # Проверяем, посещена ли точка
-                        dist = heuristic(current_point, point)
-                        pheromone = pheromone_map[
-                            point_to_index[current_point], point_to_index[point]]  # Используем индексы
+                        # Используем A* для поиска пути с учетом рельефа
+                        path_segment = a_star_path(current_point, point, _terrain_map)
+                        dist = sum(
+                            heuristic(path_segment[i], path_segment[i + 1]) for i in range(len(path_segment) - 1))
+
+                        # Получаем феромоны для перехода, берем одно значение
+                        pheromone = pheromone_map[point_to_index[current_point], point_to_index[point]]
+
+                        # Проверка на тип данных, чтобы избежать ошибки
+                        if isinstance(pheromone, np.ndarray):
+                            pheromone = pheromone.item()  # Преобразуем в одно значение float
+
                         prob = transition_probability(pheromone, dist, _alpha, _beta)
                         probabilities.append((point, prob))
 
@@ -63,9 +73,10 @@ def ant_colony_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], 
                 total_length += heuristic(current_point, next_point)
                 current_point = next_point
 
-            # Завершаем путь до конечной точки
-            total_length += heuristic(current_point, _end)
-            route.append(_end)
+            # Завершаем путь до конечной точки с учетом рельефа
+            path_segment = a_star_path(current_point, _end, _terrain_map)
+            total_length += sum(heuristic(path_segment[i], path_segment[i + 1]) for i in range(len(path_segment) - 1))
+            route.extend(path_segment[1:])
             all_routes.append(route)
             all_lengths.append(total_length)
 
@@ -77,6 +88,7 @@ def ant_colony_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], 
         # Печать прогресса
         if iteration % 10 == 0:
             print(f"Итерация {iteration}, лучший длина лучшего маршрута: {best_length}")
+
         # Обновление феромонов
         pheromone_map *= (1 - _rho)  # Испарение феромонов
         for i in range(_num_ants):
