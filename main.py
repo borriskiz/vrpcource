@@ -2,8 +2,8 @@ import numpy as np
 import noise
 import heapq
 import matplotlib.pyplot as plt
-from typing import List, Tuple
 import random
+from typing import List, Tuple
 
 # Параметры карты
 width: int = 512
@@ -22,10 +22,10 @@ num_points: int = 10  # Количество дополнительных точ
 to_random: bool = False  # Генерировать ли случайные числа
 
 # Параметры генерационного метода
-population_size = 50  # Размер популяции
-generations = 100  # Количество поколений
-mutation_rate = 0.5  # Вероятность мутации
-tournament_size = 5  # Количество агентов для отбора
+population_size: int = 50  # Размер популяции
+generations: int = 100  # Количество поколений
+mutation_rate: float = 0.5  # Вероятность мутации
+tournament_size: int = 5  # Количество агентов для отбора
 
 
 # Функция для генерации случайных точек в пределах определенной области
@@ -49,17 +49,6 @@ def generate_random_points(_start: Tuple[int, int], _end: Tuple[int, int], _num_
     return _points
 
 
-# Задание точек маршрута
-if to_random:
-    points: List[Tuple[int, int]] = generate_random_points((0, 0), (512, 512), num_points)
-else:
-    points: List[Tuple[int, int]] = [(300, 157), (72, 36), (367, 366), (42, 337), (354, 279), (489, 307), (476, 344),
-                                     (224, 231), (157, 187), (369, 457)]
-
-# Выводим результат
-print("Точки маршрута:", points)
-
-
 # Генерация карты
 def generate_map(_width: int, _height: int, _scale: float, _octaves: int, _persistence: float,
                  _lacunarity: float) -> np.ndarray:
@@ -77,6 +66,28 @@ def generate_map(_width: int, _height: int, _scale: float, _octaves: int, _persi
                 base=42
             )
     return map_data
+
+
+def prepare_basic_map() -> None:
+    plt.figure(figsize=(10, 10))
+    plt.imshow(terrain_map, cmap='terrain')
+    plt.colorbar(label="Высота")
+    plt.scatter([p[1] for p in points], [p[0] for p in points], color="purple", s=50, label="Точки маршрута")
+    plt.scatter(start[1], start[0], color="green", s=80, label="Начальная точка")
+    plt.scatter(end[1], end[0], color="red", s=80, label="Конечная точка")
+
+
+def draw_path(_path: List[Tuple[int, int]]) -> None:
+    for i in range(len(_path) - 1):
+        plt.plot([_path[i][1], _path[i + 1][1]],
+                 [_path[i][0], _path[i + 1][0]], color="red", linewidth=1, zorder=2)
+        if i % 30 == 0:  # Рисуем стрелки каждые 30 шагов
+            plt.arrow(
+                _path[i][1], _path[i][0],
+                _path[i + 1][1] - _path[i][1],
+                _path[i + 1][0] - _path[i][0],
+                head_width=5, head_length=8, fc="blue", ec="blue", zorder=3
+            )
 
 
 # Класс для узлов в графе
@@ -161,58 +172,6 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
     final_path_segment = a_star(current_point, _end, _terrain_map)
     total_path.extend(final_path_segment[1:])
     return total_path
-
-
-def prepare_basic_map() -> None:
-    plt.figure(figsize=(10, 10))
-    plt.imshow(terrain_map, cmap='terrain')
-    plt.colorbar(label="Высота")
-    plt.scatter([p[1] for p in points], [p[0] for p in points], color="purple", s=50, label="Точки маршрута")
-    plt.scatter(start[1], start[0], color="green", s=80, label="Начальная точка")
-    plt.scatter(end[1], end[0], color="red", s=80, label="Конечная точка")
-
-
-def draw_path(_path: List[Tuple[int, int]]) -> None:
-    for i in range(len(_path) - 1):
-        plt.plot([_path[i][1], _path[i + 1][1]],
-                 [_path[i][0], _path[i + 1][0]], color="red", linewidth=1, zorder=2)
-        if i % 30 == 0:  # Рисуем стрелки каждые 30 шагов
-            plt.arrow(
-                _path[i][1], _path[i][0],
-                _path[i + 1][1] - _path[i][1],
-                _path[i + 1][0] - _path[i][0],
-                head_width=5, head_length=8, fc="blue", ec="blue", zorder=3
-            )
-
-
-# Генерация карты
-terrain_map: np.ndarray = generate_map(width, height, scale, octaves, persistence, lacunarity)
-
-# Визуализация пути
-prepare_basic_map()
-
-plt.title("Оригинальный ландшафт")
-plt.legend()
-plt.show()
-
-# Поиск маршрута методом ближайшего соседа
-path_nearest_neighbor: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, end, terrain_map)
-
-# Выводим длину пути
-print(f"Длина пути (алгоритм ближайшего соседа): {calculate_path_length(path_nearest_neighbor, terrain_map)}")
-
-# Визуализация пути
-prepare_basic_map()
-draw_path(path_nearest_neighbor)
-
-plt.title("Алгоритм ближайшего соседа")
-plt.legend()
-plt.show()
-
-import random
-import numpy as np
-import matplotlib.pyplot as plt
-from typing import List, Tuple
 
 
 # Мутация - инвертирование подотрезка
@@ -362,6 +321,37 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
     return final_path
 
 
+# Задание точек маршрута
+if to_random:
+    points: List[Tuple[int, int]] = generate_random_points((0, 0), (512, 512), num_points)
+else:
+    points: List[Tuple[int, int]] = [(300, 157), (72, 36), (367, 366), (42, 337), (354, 279), (489, 307), (476, 344),
+                                     (224, 231), (157, 187), (369, 457)]
+# Выводим результат
+print("Точки маршрута:", points)
+
+# Генерация карты
+terrain_map: np.ndarray = generate_map(width, height, scale, octaves, persistence, lacunarity)
+# Визуализация пути
+prepare_basic_map()
+plt.title("Оригинальный ландшафт")
+plt.legend()
+plt.show()
+
+# Поиск маршрута методом ближайшего соседа
+path_nearest_neighbor: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, end, terrain_map)
+
+# Выводим длину пути
+print(f"Длина пути (алгоритм ближайшего соседа): {calculate_path_length(path_nearest_neighbor, terrain_map)}")
+
+# Визуализация пути
+prepare_basic_map()
+draw_path(path_nearest_neighbor)
+
+plt.title("Алгоритм ближайшего соседа")
+plt.legend()
+plt.show()
+
 # Генетический поиск маршрута
 path_genetic_algorithm: List[Tuple[int, int]] = genetic_algorithm_routing(start, points, end, terrain_map,
                                                                           population_size, generations,
@@ -372,5 +362,5 @@ prepare_basic_map()
 draw_path(path_genetic_algorithm)
 
 plt.title("Генетический алгоритм")
-plt.legend(loc="best")
+plt.legend()
 plt.show()
