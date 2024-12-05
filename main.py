@@ -82,8 +82,10 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndar
                 if neighbor_pos in closed_list:
                     continue
 
-                g_cost = current_node.g_cost + abs(_terrain_map[neighbor_pos[0], neighbor_pos[1]] -
-                                                   _terrain_map[current_node.position[0], current_node.position[1]])
+                g_cost = current_node.g_cost + abs(
+                    float(_terrain_map[neighbor_pos[0], neighbor_pos[1]]) -
+                    float(_terrain_map[current_node.position[0], current_node.position[1]])
+                )
                 h_cost = heuristic(neighbor_pos, _end)
                 neighbor_node = Node(neighbor_pos, g_cost, h_cost, current_node)
                 heapq.heappush(open_list, neighbor_node)
@@ -131,9 +133,9 @@ plt.show()
 plt.figure(figsize=(10, 10))
 plt.imshow(terrain_map, cmap='terrain')
 plt.colorbar(label="Высота")
-plt.scatter([p[1] for p in points], [p[0] for p in points], color="purple", s=50, label="Точки маршрута", zorder = 10)
-plt.scatter(start[1], start[0], color="green", s=80, label="Начальная точка", zorder = 10)
-plt.scatter(end[1], end[0], color="red", s=80, label="Конечная точка", zorder = 10)
+plt.scatter([p[1] for p in points], [p[0] for p in points], color="purple", s=50, label="Точки маршрута", zorder=10)
+plt.scatter(start[1], start[0], color="green", s=80, label="Начальная точка", zorder=10)
+plt.scatter(end[1], end[0], color="red", s=80, label="Конечная точка", zorder=10)
 for i in range(len(path_nearest_neighbor) - 1):
     plt.plot([path_nearest_neighbor[i][1], path_nearest_neighbor[i + 1][1]],
              [path_nearest_neighbor[i][0], path_nearest_neighbor[i + 1][0]], color="red", linewidth=1, zorder=2)
