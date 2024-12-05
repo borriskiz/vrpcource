@@ -5,10 +5,22 @@ from paths import a_star_path, calculate_path_length
 
 
 # Мутация - инвертирование подотрезка
-def reverse_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+def inverse_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     mutated_route = route.copy()
     idx1, idx2 = sorted(random.sample(range(len(route)), 2))
     mutated_route[idx1:idx2 + 1] = reversed(mutated_route[idx1:idx2 + 1])
+    return mutated_route
+
+
+# Мутация - перемешивание подотрезка
+def scramble_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    mutated_route = route.copy()
+    idx1, idx2 = sorted(random.sample(range(len(route)), 2))
+
+    sub_route = mutated_route[idx1:idx2 + 1]
+    random.shuffle(sub_route)
+    mutated_route[idx1:idx2 + 1] = sub_route
+
     return mutated_route
 
 
@@ -17,14 +29,6 @@ def swap_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     mutated_route = route.copy()
     idx1, idx2 = random.sample(range(len(route)), 2)
     mutated_route[idx1], mutated_route[idx2] = mutated_route[idx2], mutated_route[idx1]
-    return mutated_route
-
-
-# Мутация - случайное изменение маршрута
-def random_mutation(route: List[Tuple[int, int]], _points: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-    mutated_route = route.copy()
-    mutation_point = random.randint(0, len(route) - 1)
-    mutated_route[mutation_point] = random.choice(_points)  # Заменяем одну точку на случайную
     return mutated_route
 
 
@@ -127,11 +131,11 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
             if random.random() < _mutation_rate:
                 mutation_choice = random.random()
                 if mutation_choice < 0.33:
-                    child = reverse_mutation(child)
+                    child = inverse_mutation(child)
                 elif mutation_choice < 0.66:
                     child = swap_mutation(child)
                 else:
-                    child = random_mutation(child, _points)
+                    child = scramble_mutation(child)
 
             if check_valid_route(child):
                 new_population.append(child)
@@ -149,4 +153,3 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
     path = [a_star_path(best_solution[j], best_solution[j + 1], _terrain_map) for j in range(len(best_solution) - 1)]
     final_path = [node for segment in path if segment for node in segment[1:]]
     return final_path
-

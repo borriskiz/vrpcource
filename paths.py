@@ -39,7 +39,7 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
 
     start_node: Node = Node(_start, 0, heuristic(_start, _end))
     heapq.heappush(open_list, start_node)
-
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
     while open_list:
         current_node: Node = heapq.heappop(open_list)
         if current_node.position == _end:
@@ -51,7 +51,7 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
 
         closed_list.add(current_node.position)
 
-        for neighbor in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+        for neighbor in directions:
             neighbor_pos = (current_node.position[0] + neighbor[0], current_node.position[1] + neighbor[1])
             if 0 <= neighbor_pos[0] < _terrain_map.shape[0] and 0 <= neighbor_pos[1] < _terrain_map.shape[1]:
                 if neighbor_pos in closed_list:
@@ -82,7 +82,7 @@ def dynamic_programming_path(_start: Tuple[int, int], _end: Tuple[int, int], _te
     # Очередь для обхода карты (по принципу волнового алгоритма)
     queue = [(0, _start)]  # (стоимость, точка)
 
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]  # Направления движения (вверх, вниз, влево, вправо)
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     # Алгоритм динамического программирования
     while queue:

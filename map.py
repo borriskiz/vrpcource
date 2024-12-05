@@ -29,7 +29,8 @@ def prepare_basic_map(_start: Tuple[int, int], _end: Tuple[int, int], _points: L
     plt.figure(figsize=(10, 10))
     plt.imshow(_terrain_map, cmap='terrain')
     plt.colorbar(label="Высота")
-    plt.scatter([p[1] for p in _points], [p[0] for p in _points], color="purple", s=50, label="Точки маршрута", zorder=3)
+    plt.scatter([p[1] for p in _points], [p[0] for p in _points], color="purple", s=50, label="Точки маршрута",
+                zorder=3)
     plt.scatter(_start[1], _start[0], color="green", s=80, label="Начальная точка", zorder=3)
     plt.scatter(_end[1], _end[0], color="red", s=80, label="Конечная точка", zorder=3)
 
