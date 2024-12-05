@@ -2,8 +2,7 @@ import numpy as np
 import noise
 import heapq
 import matplotlib.pyplot as plt
-from numpy import ndarray
-from typing import Tuple  # Импортируем Tuple из typing
+from typing import List, Tuple
 
 # Параметры карты
 width: int = 512
@@ -14,12 +13,16 @@ scale: float = 100.0  # Масштаб шума
 octaves: int = 8  # Количество октав
 persistence: float = 0.5  # Влияние каждой октавы
 lacunarity: float = 2.0  # Частота осцилляций
+# Список пунктов маршрута
+
+start: Tuple[int, int] = (100, 300)  # Начальная точка
+points: List[Tuple[int, int]] = [(220, 414), (384, 273), (106, 271), (290, 232), (301, 410)]  # Пункты для маршрутизации
 
 
 # Генерация карты
 def generate_map(_width: int, _height: int, _scale: float, _octaves: int, _persistence: float,
-                 _lacunarity: float) -> ndarray:
-    map_data: ndarray = np.zeros((_height, _width))
+                 _lacunarity: float) -> np.ndarray:
+    map_data: np.ndarray = np.zeros((_height, _width))
 
     for y in range(_height):
         for x in range(_width):
@@ -39,7 +42,7 @@ def generate_map(_width: int, _height: int, _scale: float, _octaves: int, _persi
 
 
 # Генерация карты
-terrain_map: ndarray = generate_map(width, height, scale, octaves, persistence, lacunarity)
+terrain_map: np.ndarray = generate_map(width, height, scale, octaves, persistence, lacunarity)
 
 # Визуализация исходного ландшафта
 plt.imshow(terrain_map, cmap='terrain')
@@ -47,7 +50,7 @@ plt.colorbar()
 plt.show()
 
 
-# Определение класса для узлов в графе
+# Класс для узлов в графе
 class Node:
     def __init__(self, position: Tuple[int, int], g_cost: float, h_cost: float, parent: 'Node' = None) -> None:
         self.position: Tuple[int, int] = position
@@ -60,14 +63,15 @@ class Node:
         return self.f_cost < other.f_cost
 
 
-# Функция эвристики (поиск по прямой линии)
+# Эвристическая функция (поиск по прямой линии)
 def heuristic(a: Tuple[int, int], b: Tuple[int, int]) -> float:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 # Функция поиска пути с использованием A*
-def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: ndarray) -> Tuple[Tuple[int, int], ...] | None:
-    open_list: list[Node] = []
+def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndarray) -> Tuple[Tuple[
+    int, int], ...] | None:
+    open_list: List[Node] = []
     closed_list: set[Tuple[int, int]] = set()
 
     # Начальный узел
@@ -78,7 +82,7 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: ndarray
         current_node: Node = heapq.heappop(open_list)
         if current_node.position == _end:
             # Восстановление пути
-            _path: list[Tuple[int, int]] = []
+            _path: List[Tuple[int, int]] = []
             while current_node:
                 _path.append(current_node.position)
                 current_node = current_node.parent
@@ -96,7 +100,7 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: ndarray
 
                 # Стоимость перехода с учетом перепада высоты
                 g_cost: float = current_node.g_cost + abs(_terrain_map[neighbor_pos[0], neighbor_pos[1]] - _terrain_map[
-                    current_node.position[0], current_node.position[1]].item())
+                    current_node.position[0], current_node.position[1]])
 
                 h_cost: float = heuristic(neighbor_pos, _end)
                 neighbor_node: Node = Node(neighbor_pos, g_cost, h_cost, current_node)
@@ -105,39 +109,57 @@ def a_star(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: ndarray
     return None  # Путь не найден
 
 
-# Пример начальной и конечной точки
-start: Tuple[int, int] = (100, 300)  # Начальная точка
-end: Tuple[int, int] = (300, 100)  # Конечная точка
+# Функция для маршрутизации с методом ближайшего соседа
+def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _terrain_map: np.ndarray) -> List[
+    Tuple[int, int]]:
+    unvisited_points = _points.copy()  # Копируем список точек для посещения
+    current_point = _start  # Начальная точка
+    total_path = [_start]  # Начальный маршрут
 
-# Поиск пути между точками
-path: Tuple[Tuple[int, int], ...] | None = a_star(start, end, terrain_map)  # Визуализация
+    # Пока есть не посещенные точки
+    while unvisited_points:
+        # Выбираем ближайшую точку
+        closest_point = min(unvisited_points, key=lambda _point: a_star(current_point, _point, _terrain_map)[-1][0])
+        # Находим путь от текущей точки до ближайшей
+        _path = a_star(current_point, closest_point, _terrain_map)
+        if _path:
+            total_path.extend(_path[1:])  # Добавляем путь (без начальной точки, она уже в маршруте)
+            current_point = closest_point
+            unvisited_points.remove(closest_point)  # Удаляем из списка не посещенных точек
+
+    return total_path
+
+
+# Поиск маршрута между точками
+path: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, terrain_map)
 
 # Визуализация
 plt.imshow(terrain_map, cmap='terrain')
 plt.colorbar()
 
+# Рисуем все точки маршрута
+for point in points:
+    plt.scatter(point[1], point[0], color="purple", s=50, zorder=15)  # Все точки маршрута
+
 # Рисуем путь поверх карты, не изменяя исходные значения карты
 if path:
-
     # Рисуем линии и стрелки между узлами пути
     for i in range(len(path) - 1):
         start_point: Tuple[int, int] = path[i]
         end_point: Tuple[int, int] = path[i + 1]
 
         # Рисуем линию пути
-        plt.plot([start_point[1], end_point[1]], [start_point[0], end_point[0]], color="red", linewidth=1)
+        plt.plot([start_point[1], end_point[1]], [start_point[0], end_point[0]], color="red", linewidth=1, zorder=5)
 
-        if i % 30 == 0:
-            # Добавляем стрелку, уменьшаем размер и немного увеличиваем расстояние
+        if i % 10 == 0:  # Стрелки каждые 10 точек
             plt.arrow(
-                start_point[1], start_point[0],  # Координаты начала стрелки
-                end_point[1] - start_point[1], end_point[0] - start_point[0],  # Смещение
-                head_width=4, head_length=8, fc="black", ec="black", length_includes_head=True, zorder=10
-                # Размер стрелок
+                start_point[1], start_point[0],
+                end_point[1] - start_point[1], end_point[0] - start_point[0],
+                head_width=8, head_length=12, fc="blue", ec="blue", length_includes_head=True, zorder=10
             )
-    # Выделяем начальную и конечную точки как большие точки
-    plt.scatter(start[1], start[0], color="green", s=20, zorder=20)  # Начальная точка
-    plt.scatter(end[1], end[0], color="black", s=20, zorder=20)  # Конечная точка
+
+    # Выделяем начальную точку как большую зеленую точку
+    plt.scatter(start[1], start[0], color="green", s=80, zorder=20)  # Начальная точка
 
 # Показать финальный результат
 plt.show()
