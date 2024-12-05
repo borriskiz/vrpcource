@@ -2,10 +2,13 @@ from map import generate_map, prepare_basic_map, draw_path, generate_random_poin
 from neighbor import nearest_neighbor_routing
 from genetic import genetic_algorithm_routing
 from paths import calculate_path_length
-from ants import ant_colony_routing
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
+
+do_original: bool = True
+do_nearest_neighbor: bool = True
+do_genetic: bool = False
 
 # Параметры карты
 width: int = 512
@@ -20,13 +23,13 @@ lacunarity: float = 2.0  # Частота осцилляций
 # Параметры маршрута
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
-num_random_points: int = 10  # Количество случайных точек
+num_random_points: int = 20  # Количество случайных точек
 choose_points: int = 2  # 0 Генерировать ли случайные числа, 1 10 чисел, 2 20 чисел
 
 # Параметры генерационного метода
-population_size: int = 100  # Размер популяции
+population_size: int = 50  # Размер популяции
 generations: int = 100  # Количество поколений
-mutation_rate: float = 0.2  # Вероятность мутации
+mutation_rate: float = 0.3  # Вероятность мутации
 tournament_size: int = population_size // 10  # Количество агентов для отбора
 
 # Параметры метода муравьиной колонии
@@ -58,52 +61,39 @@ print("Точки маршрута:", points)
 
 # Генерация карты
 terrain_map: np.ndarray = generate_map(width, height, scale, octaves, persistence, lacunarity)
-# Визуализация пути
-prepare_basic_map(start, end, points, terrain_map)
-plt.title("Оригинальный ландшафт")
-plt.legend()
-plt.show()
+if do_original:
+    # Визуализация пути
+    prepare_basic_map(start, end, points, terrain_map)
+    plt.title("Оригинальный ландшафт")
+    plt.legend()
+    plt.show()
+if do_nearest_neighbor:
+    # Поиск маршрута методом ближайшего соседа
+    path_nearest_neighbor: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, end, terrain_map)
 
-# Поиск маршрута методом ближайшего соседа
-path_nearest_neighbor: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, end, terrain_map)
+    # Выводим длину пути
+    print(f"Длина пути (алгоритм ближайшего соседа): {calculate_path_length(path_nearest_neighbor, terrain_map)}")
 
-# Выводим длину пути
-print(f"Длина пути (алгоритм ближайшего соседа): {calculate_path_length(path_nearest_neighbor, terrain_map)}")
+    # Визуализация пути
+    prepare_basic_map(start, end, points, terrain_map)
+    draw_path(path_nearest_neighbor)
 
-# Визуализация пути
-prepare_basic_map(start, end, points, terrain_map)
-draw_path(path_nearest_neighbor)
+    plt.title("Алгоритм ближайшего соседа")
+    plt.legend()
+    plt.show()
 
-plt.title("Алгоритм ближайшего соседа")
-plt.legend()
-plt.show()
+if do_genetic:
+    # Генетический поиск маршрута
+    path_genetic: List[Tuple[int, int]] = genetic_algorithm_routing(start, points, end, terrain_map,
+                                                                    population_size, generations,
+                                                                    mutation_rate, tournament_size)
+    # Выводим длину пути
+    print(f"Длина пути (генетический алгоритм): {calculate_path_length(path_genetic, terrain_map)}")
 
-# Поиск маршрута методом муравьиной колонии
-path_ants: List[Tuple[int, int]] = ant_colony_routing(start, points, end, terrain_map, num_ants, num_iterations, alpha,
-                                                      beta, rho, q)
+    # Визуализация генетического алгоритма
+    prepare_basic_map(start, end, points, terrain_map)
+    draw_path(path_genetic)
 
-# Выводим длину пути
-print(f"Длина пути (алгоритм муравьиной колонии): {calculate_path_length(path_ants, terrain_map)}")
-
-# Визуализация пути
-prepare_basic_map(start, end, points, terrain_map)
-draw_path(path_ants)
-
-plt.title("Алгоритм муравьиной колонии")
-plt.legend()
-plt.show()
-
-# Генетический поиск маршрута
-path_genetic_algorithm: List[Tuple[int, int]] = genetic_algorithm_routing(start, points, end, terrain_map,
-                                                                          population_size, generations,
-                                                                          mutation_rate, tournament_size)
-# Выводим длину пути
-print(f"Длина пути (генетический алгоритм): {calculate_path_length(path_genetic_algorithm, terrain_map)}")
-
-# Визуализация генетического алгоритма
-prepare_basic_map(start, end, points, terrain_map)
-draw_path(path_genetic_algorithm)
-
-plt.title("Генетический алгоритм")
-plt.legend()
-plt.show()
+    plt.title("Генетический алгоритм")
+    plt.legend()
+    plt.show()

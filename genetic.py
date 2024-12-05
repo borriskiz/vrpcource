@@ -61,7 +61,7 @@ def order_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int
 
 # Турнирный отбор с агрессивным отбором лучших особей
 def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray,
-                         _tournament_size: int = 5) -> \
+                         _tournament_size: int) -> \
         List[Tuple[int, int]]:
     tournament = random.sample(population, _tournament_size)
     evaluated_tournament = [(route, calculate_path_length(route, _terrain_map)) for route in tournament]
