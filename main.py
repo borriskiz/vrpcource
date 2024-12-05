@@ -2,6 +2,7 @@ from map import generate_map, prepare_basic_map, draw_path, generate_random_poin
 from neighbor import nearest_neighbor_routing
 from genetic import genetic_algorithm_routing
 from paths import calculate_path_length
+from ants import ant_colony_routing
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
@@ -27,6 +28,15 @@ population_size: int = 50  # Размер популяции
 generations: int = 100  # Количество поколений
 mutation_rate: float = 0.2  # Вероятность мутации
 tournament_size: int = population_size // 10  # Количество агентов для отбора
+
+# Параметры метода муравьиной колонии
+
+ALPHA = 1  # Влияние феромона
+BETA = 2  # Влияние эвристики (расстояние)
+RHO = 0.1  # Коэффициент испарения феромонов
+Q = 100  # Количество феромонов, оставляемое за успешный путь
+num_ants: int = 10  # Количество муравьев
+num_iterations: int = 100  # Количество итераций
 
 # Задание точек маршрута
 points: List[Tuple[int, int]]
@@ -65,6 +75,21 @@ prepare_basic_map(start, end, points, terrain_map)
 draw_path(path_nearest_neighbor)
 
 plt.title("Алгоритм ближайшего соседа")
+plt.legend()
+plt.show()
+
+# Поиск маршрута методом муравьиной колонии
+path_ants: List[Tuple[int, int]] = ant_colony_routing(start, points, end, terrain_map, num_ants, num_iterations, ALPHA,
+                                                      BETA, RHO, Q)
+
+# Выводим длину пути
+print(f"Длина пути (алгоритм муравьиной колонии): {calculate_path_length(path_ants, terrain_map)}")
+
+# Визуализация пути
+prepare_basic_map(start, end, points, terrain_map)
+draw_path(path_ants)
+
+plt.title("Алгоритм муравьиной колонии")
 plt.legend()
 plt.show()
 
