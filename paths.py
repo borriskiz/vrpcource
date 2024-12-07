@@ -37,7 +37,7 @@ def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray)
 def calculate_height(_from: Tuple[int, int], _to: Tuple[int, int], _terrain_map: np.ndarray) -> float:
     height1: float = float(_terrain_map[_from[0], _from[1]])
     height2: float = float(_terrain_map[_to[0], _to[1]])
-    return 1000 * abs(height2 - height1)
+    return 150 * abs(height2 - height1)
 
 
 # Поиск пути с использованием A*

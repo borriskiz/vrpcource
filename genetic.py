@@ -3,6 +3,21 @@ import random
 import numpy as np
 from paths import a_star_path, calculate_path_length
 
+# Кэш для хранения путей между точками
+path_cache = {}
+
+
+def get_path_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int], terrain_map: np.ndarray) -> List[
+    Tuple[int, int]]:
+    # Проверка, есть ли уже путь в кэше
+    if (start, end) in path_cache:
+        return path_cache[(start, end)]
+
+    # Если пути нет в кэше, вычисляем его с использованием A* и сохраняем в кэш
+    path = a_star_path(start, end, terrain_map)
+    path_cache[(start, end)] = path
+    return path
+
 
 # Мутация - инвертирование подотрезка
 def inverse_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
@@ -156,8 +171,10 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
             if not check_valid_route(full_route):
                 continue  # Пропускаем невалидные маршруты
 
-            path = [a_star_path(full_route[j], full_route[j + 1], _terrain_map) for j in range(len(full_route) - 1)]
-            path = [node for segment in path if segment for node in segment[1:]]
+            path = []
+            for j in range(len(full_route) - 1):
+                segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map)
+                path.extend(segment[1:])  # исключаем начальную точку сегмента
             length = calculate_path_length(path, _terrain_map)
             evaluated_population.append((route, length))
 
@@ -174,14 +191,11 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
         new_population = best_routes[:]
 
         while len(new_population) < _population_size:
-            # parent1 = tournament_selection(best_routes, _terrain_map, _tournament_size)
-            # parent2 = tournament_selection(best_routes, _terrain_map, _tournament_size)
             parent1 = adaptive_tournament_selection(best_routes, _terrain_map, generation, _generations,
                                                     _tournament_size)
             parent2 = adaptive_tournament_selection(best_routes, _terrain_map, generation, _generations,
                                                     _tournament_size)
 
-            # child = order_crossover(parent1, parent2)
             child = pmx_crossover(parent1, parent2)
 
             if random.random() < _mutation_rate:
@@ -201,6 +215,9 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
     if best_solution is None:
         raise ValueError("Не найдено корректного маршрута.")
 
-    path = [a_star_path(best_solution[j], best_solution[j + 1], _terrain_map) for j in range(len(best_solution) - 1)]
-    final_path = [node for segment in path if segment for node in segment[1:]]
+    path = []
+    for j in range(len(best_solution) - 1):
+        segment = get_path_from_cache_or_calculate(best_solution[j], best_solution[j + 1], _terrain_map)
+        path.extend(segment[1:])
+    final_path = path
     return final_path
