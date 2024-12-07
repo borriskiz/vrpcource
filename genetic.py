@@ -6,7 +6,7 @@ from paths import calculate_path_length, get_path_from_cache_or_calculate
 path_cache = {}
 
 
-# Мутация - инвертирование подотрезка
+# Мутация - инвертирование част отрезка
 def inverse_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     mutated_route = route.copy()
     idx1, idx2 = sorted(random.sample(range(len(route)), 2))
@@ -14,7 +14,7 @@ def inverse_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     return mutated_route
 
 
-# Мутация - перемешивание подотрезка
+# Мутация - перемешивание части отрезка
 def scramble_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     mutated_route = route.copy()
     idx1, idx2 = sorted(random.sample(range(len(route)), 2))
