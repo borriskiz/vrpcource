@@ -2,46 +2,11 @@ from map import generate_map, prepare_basic_map, draw_path, generate_random_poin
 from neighbor import nearest_neighbor_routing
 from genetic import genetic_algorithm_routing
 from brute_force import brute_force_routing
-from paths import calculate_path_length
+from paths import calculate_path_length, a_star_path
+from settings import *
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
-
-do_original: bool = False
-do_brute_force: bool = False
-do_nearest_neighbor: bool = True
-do_genetic: bool = False
-
-# Параметры карты
-width: int = 512
-height: int = 512
-scale: float = 100.0  # Масштаб шума
-
-# Параметры шума
-octaves: int = 10  # Количество октав
-persistence: float = 0.5  # Влияние каждой октавы
-lacunarity: float = 2.0  # Частота осцилляций
-
-# Параметры маршрута
-start: Tuple[int, int] = (100, 100)  # Начальная точка
-end: Tuple[int, int] = (400, 400)  # Конечная точка
-num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
-
-# Параметры генерационного метода
-population_size: int = 100  # Размер популяции
-generations: int = 100  # Количество поколений
-mutation_rate: float = 0.3  # Вероятность мутации
-tournament_size: int = population_size // 10  # Количество агентов для отбора
-
-# Параметры метода муравьиной колонии
-
-alpha = 1  # Влияние феромона
-beta = 2  # Влияние эвристики (расстояние)
-rho = 0.1  # Коэффициент испарения феромонов
-q = 100  # Количество феромонов, оставляемое за успешный путь
-num_ants: int = 10  # Количество муравьев
-num_iterations: int = 10  # Количество итераций
 
 # Задание точек маршрута
 points: List[Tuple[int, int]]
@@ -69,6 +34,20 @@ if do_original:
     # Визуализация пути
     prepare_basic_map(start, end, points, terrain_map)
     plt.title("Оригинальный ландшафт")
+    plt.legend()
+    plt.show()
+if do_a_star:
+    # Поиск маршрута методом ближайшего соседа
+    path_a_star: List[Tuple[int, int]] = a_star_path(start, end, terrain_map)
+
+    # Выводим длину пути
+    print(f"Длина пути (a*): {calculate_path_length(path_a_star, terrain_map)}")
+
+    # Визуализация пути
+    prepare_basic_map(start, end, points, terrain_map)
+    draw_path(path_a_star)
+
+    plt.title("А*")
     plt.legend()
     plt.show()
 if do_brute_force:
