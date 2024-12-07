@@ -1,4 +1,4 @@
-from paths import heuristic, get_path_from_cache_or_calculate
+from paths import get_path_from_cache_or_calculate, calculate_path_length
 from typing import List, Tuple
 import numpy as np
 
@@ -14,7 +14,9 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
 
     while unvisited_points:
         # Находим ближайшую точку
-        closest_point = min(unvisited_points, key=lambda p: heuristic(current_point, p))
+        # closest_point = min(unvisited_points, key=lambda p: heuristic(current_point, p))
+        closest_point = min(unvisited_points, key=lambda p: calculate_path_length(
+            get_path_from_cache_or_calculate(current_point, p, _terrain_map, path_cache), _terrain_map))
 
         # Получаем путь между текущей точкой и ближайшей с учётом кэширования
         path_segment = get_path_from_cache_or_calculate(current_point, closest_point, _terrain_map, path_cache)
@@ -27,5 +29,6 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
     # Добавляем путь к конечной точке
     final_path_segment = get_path_from_cache_or_calculate(current_point, _end, _terrain_map, path_cache)
     total_path.extend(final_path_segment[1:])
+    path_cache.clear()
 
     return total_path
