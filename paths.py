@@ -37,24 +37,29 @@ def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray)
 def calculate_height(_from: Tuple[int, int], _to: Tuple[int, int], _terrain_map: np.ndarray) -> float:
     height1: float = float(_terrain_map[_from[0], _from[1]])
     height2: float = float(_terrain_map[_to[0], _to[1]])
-    return abs(height2 - height1)
+    return 1000 * abs(height2 - height1)
 
 
 # Поиск пути с использованием A*
 def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
     open_list: List[Node] = []
     closed_list: set[Tuple[int, int]] = set()
+    came_from: dict[Tuple[int, int], Node] = {}  # Словарь для отслеживания пути
+    g_costs: dict[Tuple[int, int], float] = {}  # Словарь для хранения g_cost узлов
 
     start_node: Node = Node(_start, 0, heuristic(_start, _end))
     heapq.heappush(open_list, start_node)
+    g_costs[_start] = 0  # Начальная стоимость пути для старта
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
     while open_list:
         current_node: Node = heapq.heappop(open_list)
+
         if current_node.position == _end:
             path = []
             while current_node:
                 path.append(current_node.position)
-                current_node = current_node.parent
+                current_node = came_from.get(current_node.position)
             return path[::-1]
 
         closed_list.add(current_node.position)
@@ -65,8 +70,17 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
                 if neighbor_pos in closed_list:
                     continue
 
+                # Вычисляем новые g_cost и h_cost
                 g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
                 h_cost = heuristic(neighbor_pos, _end)
+
+                # Проверяем, если этот сосед уже в открытом списке с более высокой стоимостью, пропускаем его
+                if neighbor_pos in g_costs and g_costs[neighbor_pos] <= g_cost:
+                    continue
+
+                g_costs[neighbor_pos] = g_cost  # Обновляем g_cost для соседа
                 neighbor_node = Node(neighbor_pos, g_cost, h_cost, current_node)
                 heapq.heappush(open_list, neighbor_node)
+                came_from[neighbor_pos] = current_node  # Отслеживаем путь
+
     return []

@@ -26,10 +26,10 @@ lacunarity: float = 2.0  # Частота осцилляций
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
 num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 6  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
+choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
 
 # Параметры генерационного метода
-population_size: int = 100  # Размер популяции
+population_size: int = 50  # Размер популяции
 generations: int = 100  # Количество поколений
 mutation_rate: float = 0.3  # Вероятность мутации
 tournament_size: int = population_size // 10  # Количество агентов для отбора
