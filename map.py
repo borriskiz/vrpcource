@@ -11,7 +11,8 @@ def generate_map(_width: int, _height: int, _scale: float, _octaves: int, _persi
     map_data: np.ndarray = np.zeros((_height, _width))
     for y in range(_height):
         for x in range(_width):
-            map_data[y][x] = noise.snoise2(
+            # Генерация значения шума Перлина в диапазоне [-1, 1]
+            raw_value = noise.snoise2(
                 x / _scale,
                 y / _scale,
                 octaves=_octaves,
@@ -21,6 +22,13 @@ def generate_map(_width: int, _height: int, _scale: float, _octaves: int, _persi
                 repeaty=1024,
                 base=42
             )
+
+            # Нормализация в диапазон [0, 1]
+            normalized_value = (raw_value + 1) / 2  # Переводим в диапазон [0, 1]
+
+            # Записываем в карту
+            map_data[y][x] = normalized_value
+
     return map_data
 
 
