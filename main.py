@@ -6,9 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
-do_original: bool = True
+do_original: bool = False
 do_nearest_neighbor: bool = True
-do_genetic: bool = False
+do_genetic: bool = True
 
 # Параметры карты
 width: int = 512

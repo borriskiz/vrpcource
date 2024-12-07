@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import random
 import numpy as np
-from paths import a_star_path, calculate_path_length
+from paths import a_star_path, calculate_path_length, Node
 
 
 # Мутация - инвертирование подотрезка
@@ -32,6 +32,24 @@ def swap_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     return mutated_route
 
 
+# Диверсификация мутаций
+def diversified_mutation(_route: List[Tuple[int, int]], _generation: int, _max_generations: int) -> List[
+    Tuple[int, int]]:
+    mutation_choice = random.random()
+    if _generation < _max_generations * 0.5:  # Для начальных поколений более случайные мутации
+        if mutation_choice < 0.33:
+            return inverse_mutation(_route)
+        elif mutation_choice < 0.66:
+            return scramble_mutation(_route)
+        else:
+            return swap_mutation(_route)
+    else:  # Для поздних поколений более "серьезные" мутации
+        if mutation_choice < 0.5:
+            return inverse_mutation(_route)
+        else:
+            return scramble_mutation(_route)
+
+
 def order_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     # Размер маршрута
     size = len(parent1)
@@ -59,6 +77,30 @@ def order_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int
     return child
 
 
+# Partially Mapped Crossover (PMX)
+def pmx_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    size = len(parent1)
+    start, end = sorted(random.sample(range(size), 2))  # Случайный диапазон для обмена
+    child = [(-1, -1)] * size  # Инициализируем пустой маршрут, маркером (-1, -1)
+
+    # Копируем сегмент из первого родителя в новый маршрут
+    for i in range(start, end + 1):
+        child[i] = parent1[i]
+
+    # Вставляем недостающие элементы из второго родителя
+    for i in range(size):
+        if child[i] == (-1, -1):  # Если позиция ещё пустая
+            # Ищем элемент из второго родителя, который ещё не вставлен в ребёнка
+            for j in range(size):
+                if parent2[j] not in child:
+                    child[i] = parent2[j]
+                    break
+    # Проверка, что все позиции заполнены
+    if (-1, -1) in child:
+        raise ValueError("Не все позиции заполнены корректно.")
+    return child
+
+
 # Турнирный отбор с агрессивным отбором лучших особей
 def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray,
                          _tournament_size: int) -> \
@@ -77,6 +119,15 @@ def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: 
     return best_route
 
 
+# Адаптивный размер турнира
+def adaptive_tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray,
+                                  generation: int, _generations: int, _tournament_base_size: int) -> List[
+    Tuple[int, int]]:
+    # Увеличиваем размер турнира на поздних этапах
+    tournament_size = max(_tournament_base_size, int(_tournament_base_size * (1 + generation / _generations)))
+    return tournament_selection(population, _terrain_map, tournament_size)
+
+
 # Проверка, что передаваемые точки не являются None
 def check_valid_route(route: List[Tuple[int, int]]) -> bool:
     # Проверка на наличие None или маршрута длины 1
@@ -88,8 +139,8 @@ def check_valid_route(route: List[Tuple[int, int]]) -> bool:
 
 # Генетический алгоритм
 def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
-                              _terrain_map: np.ndarray, _population_size: int = 100, _generations: int = 200,
-                              _mutation_rate: float = 0.2, _tournament_size: int = 7) -> List[Tuple[int, int]]:
+                              _terrain_map: np.ndarray, _population_size: int, _generations: int,
+                              _mutation_rate: float, _tournament_size: int) -> List[Tuple[int, int]]:
     # Инициализация популяции
     population = [random.sample(_points, len(_points)) for _ in range(_population_size)]
 
@@ -123,19 +174,19 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
         new_population = best_routes[:]
 
         while len(new_population) < _population_size:
-            parent1 = tournament_selection(best_routes, _terrain_map, _tournament_size)
-            parent2 = tournament_selection(best_routes, _terrain_map, _tournament_size)
+            # parent1 = tournament_selection(best_routes, _terrain_map, _tournament_size)
+            # parent2 = tournament_selection(best_routes, _terrain_map, _tournament_size)
+            parent1 = adaptive_tournament_selection(best_routes, _terrain_map, generation, _generations,
+                                                    _tournament_size)
+            parent2 = adaptive_tournament_selection(best_routes, _terrain_map, generation, _generations,
+                                                    _tournament_size)
 
-            child = order_crossover(parent1, parent2)
+            # child = order_crossover(parent1, parent2)
+            child = pmx_crossover(parent1, parent2)
 
             if random.random() < _mutation_rate:
-                mutation_choice = random.random()
-                if mutation_choice < 0.33:
-                    child = inverse_mutation(child)
-                elif mutation_choice < 0.66:
-                    child = swap_mutation(child)
-                else:
-                    child = scramble_mutation(child)
+                # Применяем диверсифицированную мутацию
+                child = diversified_mutation(child, generation, _generations)
 
             if check_valid_route(child):
                 new_population.append(child)
