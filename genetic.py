@@ -196,7 +196,7 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
         # Печать прогресса
         if generation % 10 == 0:
-            print(f"Поколение {generation}, лучший длина лучшего маршрута: {best_length}")
+            print(f"Поколение {generation}, длина лучшего маршрута: {best_length}")
 
     # Возвращаем лучший найденный маршрут
     if best_solution is None:

@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
+# Параметры выполняемых опытов
 do_original: bool = True
 do_brute_force: bool = False
 do_nearest_neighbor: bool = True
@@ -25,11 +26,11 @@ lacunarity: float = 2.0  # Частота осцилляций
 # Параметры маршрута
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
-num_random_points: int = 7  # Количество случайных точек
-choose_points: int = 0  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
+num_random_points: int = 20  # Количество случайных точек
+choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
 
 # Параметры генетического метода
-population_size: int = 50  # Размер популяции
+population_size: int = 100  # Размер популяции
 generations: int = 100  # Количество поколений
 mutation_rate: float = 0.3  # Вероятность мутации
 tournament_size: int = population_size // 10  # Количество агентов для отбора
@@ -62,6 +63,7 @@ if do_original:
     plt.title("Оригинальный ландшафт")
     plt.legend()
     plt.show()
+
 if do_brute_force:
     # Поиск маршрута методом ближайшего соседа
     path_brute_force: List[Tuple[int, int]] = brute_force_routing(start, points, end, terrain_map)
@@ -76,6 +78,7 @@ if do_brute_force:
     plt.title("Алгоритм грубой силы")
     plt.legend()
     plt.show()
+
 if do_nearest_neighbor:
     # Поиск маршрута методом ближайшего соседа
     path_nearest_neighbor: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, end, terrain_map)
