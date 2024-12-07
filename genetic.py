@@ -1,22 +1,9 @@
 from typing import List, Tuple
 import random
 import numpy as np
-from paths import a_star_path, calculate_path_length
+from paths import calculate_path_length, get_path_from_cache_or_calculate
 
-# Кэш для хранения путей между точками
 path_cache = {}
-
-
-def get_path_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int], terrain_map: np.ndarray) -> List[
-    Tuple[int, int]]:
-    # Проверка, есть ли уже путь в кэше
-    if (start, end) in path_cache:
-        return path_cache[(start, end)]
-
-    # Если пути нет в кэше, вычисляем его с использованием A* и сохраняем в кэш
-    path = a_star_path(start, end, terrain_map)
-    path_cache[(start, end)] = path
-    return path
 
 
 # Мутация - инвертирование подотрезка
@@ -173,7 +160,7 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
             path = []
             for j in range(len(full_route) - 1):
-                segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map)
+                segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map, path_cache)
                 path.extend(segment[1:])  # исключаем начальную точку сегмента
             length = calculate_path_length(path, _terrain_map)
             evaluated_population.append((route, length))
@@ -217,7 +204,7 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
     path = []
     for j in range(len(best_solution) - 1):
-        segment = get_path_from_cache_or_calculate(best_solution[j], best_solution[j + 1], _terrain_map)
+        segment = get_path_from_cache_or_calculate(best_solution[j], best_solution[j + 1], _terrain_map, path_cache)
         path.extend(segment[1:])
     final_path = path
     return final_path

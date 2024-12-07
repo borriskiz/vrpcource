@@ -2,6 +2,21 @@ from typing import List, Tuple
 import heapq
 import numpy as np
 
+height_weight: float = 200
+
+
+def get_path_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int], terrain_map: np.ndarray,
+                                     _path_cache: dict) -> List[
+    Tuple[int, int]]:
+    # Проверка, есть ли уже путь в кэше
+    if (start, end) in _path_cache:
+        return _path_cache[(start, end)]
+
+    # Если пути нет в кэше, вычисляем его с использованием A* и сохраняем в кэш
+    path = a_star_path(start, end, terrain_map)
+    _path_cache[(start, end)] = path
+    return path
+
 
 # Класс для узлов в графе
 class Node:
@@ -37,7 +52,7 @@ def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray)
 def calculate_height(_from: Tuple[int, int], _to: Tuple[int, int], _terrain_map: np.ndarray) -> float:
     height1: float = float(_terrain_map[_from[0], _from[1]])
     height2: float = float(_terrain_map[_to[0], _to[1]])
-    return 150 * abs(height2 - height1)
+    return height_weight * abs(height2 - height1)
 
 
 # Поиск пути с использованием A*

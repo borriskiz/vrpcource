@@ -1,7 +1,9 @@
 import itertools
 from typing import List, Tuple
 import numpy as np
-from paths import a_star_path, calculate_path_length
+from paths import calculate_path_length, get_path_from_cache_or_calculate
+
+path_cache = {}
 
 
 # Функция для маршрутизации методом полного перебора всех маршрутов с промежуточными точками
@@ -27,7 +29,8 @@ def brute_force_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]],
         # Проходим по всем сегментам маршрута
         for i in range(len(current_path) - 1):
             # Для каждого сегмента пути между точками вычисляем путь с учетом ландшафта
-            segment_path = a_star_path(current_path[i], current_path[i + 1], _terrain_map)
+            segment_path = get_path_from_cache_or_calculate(current_path[i], current_path[i + 1], _terrain_map,
+                                                            path_cache)
             # Добавляем сегмент пути в общий путь
             if i != len(current_path) - 2:  # не добавляем конечную точку повторно
                 full_path.extend(segment_path[:-1])
