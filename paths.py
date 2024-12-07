@@ -28,9 +28,16 @@ def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray)
     for j in range(len(path) - 1):
         x1, y1 = path[j]
         x2, y2 = path[j + 1]
-        terrain_cost = abs(_terrain_map[x2, y2] - _terrain_map[x1, y1])
+        terrain_cost = calculate_height((x1, y1), (x2, y2), _terrain_map)
         length += heuristic((x1, y1), (x2, y2)) + terrain_cost
     return length
+
+
+# Функция для вычисления длины маршрута с учетом ландшафта
+def calculate_height(_from: Tuple[int, int], _to: Tuple[int, int], _terrain_map: np.ndarray) -> float:
+    height1: float = float(_terrain_map[_from[0], _from[1]])
+    height2: float = float(_terrain_map[_to[0], _to[1]])
+    return abs(height2 - height1)
 
 
 # Поиск пути с использованием A*
@@ -58,10 +65,7 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
                 if neighbor_pos in closed_list:
                     continue
 
-                g_cost = current_node.g_cost + abs(
-                    float(_terrain_map[neighbor_pos[0], neighbor_pos[1]]) -
-                    float(_terrain_map[current_node.position[0], current_node.position[1]])
-                )
+                g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
                 h_cost = heuristic(neighbor_pos, _end)
                 neighbor_node = Node(neighbor_pos, g_cost, h_cost, current_node)
                 heapq.heappush(open_list, neighbor_node)
