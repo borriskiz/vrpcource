@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import random
 import numpy as np
-from paths import a_star_path, calculate_path_length, Node
+from paths import a_star_path, calculate_path_length
 
 
 # Мутация - инвертирование подотрезка
