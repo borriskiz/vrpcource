@@ -1,7 +1,6 @@
 from typing import List, Tuple
 import heapq
 import numpy as np
-from settings import height_cost_coefficient
 
 
 # Класс для узлов в графе
@@ -23,24 +22,13 @@ def heuristic(a: Tuple[int, int], b: Tuple[int, int]) -> float:
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
-# Функция для учета перепада высоты между двумя точками
-def height_cost(from_pos: Tuple[int, int], to_pos: Tuple[int, int], terrain_map: np.ndarray) -> float:
-    # Разница в высоте между двумя точками
-    height1: float = float(terrain_map[to_pos[0], to_pos[1]])
-    height2: float = float(terrain_map[from_pos[0], from_pos[1]])
-    height_diff: float = height1 - height2
-    # height_diff: float = abs(height1 - height2)
-    # Применение коэффициента для перепада высоты
-    return height_cost_coefficient * height_diff
-
-
 # Функция для вычисления длины маршрута с учетом ландшафта
-def calculate_path_length(path: List[Tuple[int, int]], terrain_map: np.ndarray) -> float:
+def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray) -> float:
     length = 0
     for j in range(len(path) - 1):
         x1, y1 = path[j]
         x2, y2 = path[j + 1]
-        terrain_cost = height_cost((x1, y1), (x2, y2), terrain_map)
+        terrain_cost = abs(_terrain_map[x2, y2] - _terrain_map[x1, y1])
         length += heuristic((x1, y1), (x2, y2)) + terrain_cost
     return length
 
@@ -53,7 +41,6 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
     start_node: Node = Node(_start, 0, heuristic(_start, _end))
     heapq.heappush(open_list, start_node)
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-
     while open_list:
         current_node: Node = heapq.heappop(open_list)
         if current_node.position == _end:
@@ -71,11 +58,11 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
                 if neighbor_pos in closed_list:
                     continue
 
-                # Используем height_cost для расчета g_cost
-                g_cost = current_node.g_cost + height_cost(
-                    current_node.position, neighbor_pos, _terrain_map)
+                g_cost = current_node.g_cost + abs(
+                    float(_terrain_map[neighbor_pos[0], neighbor_pos[1]]) -
+                    float(_terrain_map[current_node.position[0], current_node.position[1]])
+                )
                 h_cost = heuristic(neighbor_pos, _end)
                 neighbor_node = Node(neighbor_pos, g_cost, h_cost, current_node)
                 heapq.heappush(open_list, neighbor_node)
-
     return []
