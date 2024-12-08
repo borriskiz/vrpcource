@@ -16,7 +16,7 @@ def brute_force_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]],
     if len(all_points) > 10:
         print("Внимание! Число точек больше 10, алгоритм будет работать очень долго!")
 
-    best_path = None
+    final_path = None
     min_cost = float('inf')
 
     # Перебор всех перестановок
@@ -42,6 +42,6 @@ def brute_force_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]],
         # Если найден новый минимальный путь, сохраняем его
         if total_cost < min_cost:
             min_cost = total_cost
-            best_path = full_path
-
-    return best_path
+            final_path = full_path
+    # print(f"Итоговый путь: {final_path}")
+    return final_path

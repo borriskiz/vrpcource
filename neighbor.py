@@ -10,7 +10,7 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
                              _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
     unvisited_points = _points.copy()
     current_point = _start
-    total_path = [_start]
+    final_path = [_start]
 
     while unvisited_points:
         # Находим ближайшую точку
@@ -20,7 +20,7 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
 
         # Получаем путь между текущей точкой и ближайшей с учётом кэширования
         path_segment = get_path_from_cache_or_calculate(current_point, closest_point, _terrain_map, path_cache)
-        total_path.extend(path_segment[1:])  # Добавляем путь без начальной точки сегмента
+        final_path.extend(path_segment[1:])  # Добавляем путь без начальной точки сегмента
 
         # Обновляем текущую точку и убираем её из не посещённых
         current_point = closest_point
@@ -28,7 +28,8 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
 
     # Добавляем путь к конечной точке
     final_path_segment = get_path_from_cache_or_calculate(current_point, _end, _terrain_map, path_cache)
-    total_path.extend(final_path_segment[1:])
+    final_path.extend(final_path_segment[1:])
     path_cache.clear()
+    # print(f"Итоговый путь: {final_path}")
 
-    return total_path
+    return final_path

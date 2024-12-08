@@ -158,11 +158,11 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
             if not check_valid_route(full_route):
                 continue  # Пропускаем невалидные маршруты
 
-            path = []
+            final_path = []
             for j in range(len(full_route) - 1):
                 segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map, path_cache)
-                path.extend(segment[1:])  # исключаем начальную точку сегмента
-            length = calculate_path_length(path, _terrain_map)
+                final_path.extend(segment[:])  # исключаем начальную точку сегмента
+            length = calculate_path_length(final_path, _terrain_map)
             evaluated_population.append((route, length))
 
             # Обновляем лучший маршрут, если найден более короткий
@@ -202,9 +202,11 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
     if best_solution is None:
         raise ValueError("Не найдено корректного маршрута.")
 
-    path = []
+    final_path = []
     for j in range(len(best_solution) - 1):
         segment = get_path_from_cache_or_calculate(best_solution[j], best_solution[j + 1], _terrain_map, path_cache)
-        path.extend(segment[1:])
-    final_path = path
+        final_path.extend(segment[1:])
+    final_path = [_start] + final_path
+    # print(f"Итоговый путь: {final_path}")
+
     return final_path
