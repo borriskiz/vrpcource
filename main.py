@@ -2,6 +2,7 @@ from map import generate_map, prepare_basic_map, draw_path, generate_random_poin
 from neighbor import nearest_neighbor_routing
 from genetic import genetic_algorithm_routing
 from brute_force import brute_force_routing
+from annealing import simulated_annealing_routing
 from paths import calculate_path_length
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,6 +12,7 @@ from typing import List, Tuple
 do_original: bool = True
 do_brute_force: bool = False
 do_nearest_neighbor: bool = True
+do_annealing: bool = True
 do_genetic: bool = True
 
 # Параметры карты
@@ -27,13 +29,18 @@ lacunarity: float = 2.0  # Частота осцилляций
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
 num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 0  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
+choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
 
 # Параметры генетического метода
 population_size: int = 100  # Размер популяции
 generations: int = 100  # Количество поколений
 mutation_rate: float = 0.3  # Вероятность мутации
 tournament_size: int = population_size // 10  # Количество агентов для отбора
+
+# Параметры симулированного отжига
+initial_temp: float = 1000
+cooling_rate: float = 0.998
+iterations: int = 1000
 
 # Задание точек маршрута
 points: List[Tuple[int, int]]
@@ -93,7 +100,21 @@ if do_nearest_neighbor:
     plt.title("Алгоритм ближайшего соседа")
     plt.legend()
     plt.show()
+if do_annealing:
+    # Поиск маршрута методом симулированного отжига
+    path_annealing: List[Tuple[int, int]] = simulated_annealing_routing(start, points, end, terrain_map, initial_temp,
+                                                                        cooling_rate, iterations)
 
+    # Выводим длину пути
+    print(f"Длина пути (алгоритм симулированного отжига): {calculate_path_length(path_annealing, terrain_map)}")
+
+    # Визуализация пути
+    prepare_basic_map(start, end, points, terrain_map)
+    draw_path(path_annealing)
+
+    plt.title("Алгоритм симулированного отжига")
+    plt.legend()
+    plt.show()
 if do_genetic:
     # Генетический поиск маршрута
     path_genetic: List[Tuple[int, int]] = genetic_algorithm_routing(start, points, end, terrain_map,
