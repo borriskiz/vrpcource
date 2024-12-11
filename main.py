@@ -42,6 +42,23 @@ initial_temp: float = 1000
 cooling_rate: float = 0.998
 iterations: int = 1000
 
+
+def visualize_route(_path: List[Tuple[int, int]], _algorithm_name: str, _start: Tuple[int, int],
+                    _points: List[Tuple[int, int]], _end: Tuple[int, int], _terrain_map: np.ndarray):
+    # Расчет длины пути и округление
+    path_length = round(calculate_path_length(_path, _terrain_map), 3)
+    print(f"Длина пути ({_algorithm_name}): {path_length}")
+
+    # Визуализация пути
+    prepare_basic_map(_start, _end, _points, _terrain_map)
+    draw_path(_path)
+
+    # Заголовок с длиной пути
+    plt.title(f"{_algorithm_name}, Длина пути: {path_length}")
+    plt.legend()
+    plt.show()
+
+
 # Задание точек маршрута
 points: List[Tuple[int, int]]
 
@@ -72,62 +89,24 @@ if do_original:
     plt.show()
 
 if do_brute_force:
-    # Поиск маршрута методом ближайшего соседа
+    # Поиск маршрута методом грубой силы
     path_brute_force: List[Tuple[int, int]] = brute_force_routing(start, points, end, terrain_map)
-
-    # Выводим длину пути
-    print(f"Длина пути (алгоритм грубой силы): {calculate_path_length(path_brute_force, terrain_map)}")
-
-    # Визуализация пути
-    prepare_basic_map(start, end, points, terrain_map)
-    draw_path(path_brute_force)
-
-    plt.title("Алгоритм грубой силы")
-    plt.legend()
-    plt.show()
+    visualize_route(path_brute_force, "Алгоритм грубой силы", start, points, end, terrain_map)
 
 if do_nearest_neighbor:
     # Поиск маршрута методом ближайшего соседа
     path_nearest_neighbor: List[Tuple[int, int]] = nearest_neighbor_routing(start, points, end, terrain_map)
+    visualize_route(path_nearest_neighbor, "Алгоритм ближайшего соседа", start, points, end, terrain_map)
 
-    # Выводим длину пути
-    print(f"Длина пути (алгоритм ближайшего соседа): {calculate_path_length(path_nearest_neighbor, terrain_map)}")
-
-    # Визуализация пути
-    prepare_basic_map(start, end, points, terrain_map)
-    draw_path(path_nearest_neighbor)
-
-    plt.title("Алгоритм ближайшего соседа")
-    plt.legend()
-    plt.show()
 if do_annealing:
     # Поиск маршрута методом симулированного отжига
     path_annealing: List[Tuple[int, int]] = simulated_annealing_routing(start, points, end, terrain_map, initial_temp,
                                                                         cooling_rate, iterations)
+    visualize_route(path_annealing, "Алгоритм симулированного отжига", start, points, end, terrain_map)
 
-    # Выводим длину пути
-    print(f"Длина пути (алгоритм симулированного отжига): {calculate_path_length(path_annealing, terrain_map)}")
-
-    # Визуализация пути
-    prepare_basic_map(start, end, points, terrain_map)
-    draw_path(path_annealing)
-
-    plt.title("Алгоритм симулированного отжига")
-    plt.legend()
-    plt.show()
 if do_genetic:
     # Генетический поиск маршрута
     path_genetic: List[Tuple[int, int]] = genetic_algorithm_routing(start, points, end, terrain_map,
                                                                     population_size, generations,
                                                                     mutation_rate, tournament_size)
-    # Выводим длину пути
-    print(f"Длина пути (генетический алгоритм): {calculate_path_length(path_genetic, terrain_map)}")
-
-    # Визуализация генетического алгоритма
-    prepare_basic_map(start, end, points, terrain_map)
-    draw_path(path_genetic)
-
-    plt.title("Генетический алгоритм")
-    plt.legend()
-    plt.show()
-
+    visualize_route(path_genetic, "Генетический алгоритм", start, points, end, terrain_map)
