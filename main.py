@@ -130,3 +130,4 @@ if do_genetic:
     plt.title("Генетический алгоритм")
     plt.legend()
     plt.show()
+

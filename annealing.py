@@ -6,7 +6,6 @@ from paths import get_path_from_cache_or_calculate, calculate_path_length
 
 path_cache = {}
 
-
 # Функция для генерации соседнего маршрута (изменение порядка промежуточных точек)
 def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     new_route = route.copy()
@@ -15,7 +14,6 @@ def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     new_route[idx1], new_route[idx2] = new_route[idx2], new_route[idx1]  # Меняем местами их
     return new_route
 
-
 # Функция для расчета длины пути с использованием get_path_from_cache_or_calculate
 def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray) -> float:
     total_path = []
@@ -23,11 +21,10 @@ def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray)
     # Рассчитываем путь от начальной точки до первой промежуточной
     for i in range(len(route) - 1):
         segment = get_path_from_cache_or_calculate(route[i], route[i + 1], _terrain_map, path_cache)
-        total_path.extend(segment[1:])  # Исключаем повторение начальной точки сегмента
+        total_path.extend(segment)  # Добавляем все точки сегмента, включая начальную
 
     # Подсчитываем стоимость пути
     return calculate_path_length(total_path, _terrain_map)
-
 
 # Функция для симулированного отжига
 def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
@@ -45,7 +42,7 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
 
     for iteration in range(_iterations):
         # Генерация соседнего решения (меняем местами промежуточные точки)
-        neighbor_solution = generate_neighbor(current_solution)  # Теперь генерируем соседей со всеми точками
+        neighbor_solution = generate_neighbor(current_solution)  # Генерация соседа
         # Расчет стоимости нового маршрута
         neighbor_cost = calculate_total_cost(neighbor_solution, _terrain_map)
 
@@ -77,14 +74,15 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
 
         # Понижаем скорость охлаждения на каждом шаге (вы можете настроить)
         if iteration % 100 == 0:
-            print(
-                f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
+            print(f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
 
     # Возвращаем лучшее найденное решение
     # Здесь обязательно добавляем промежуточные точки в итоговый путь
-    final_path = [_start]  # Добавляем начальную точку в путь
+    final_path = [_start]  # Начальная точка
     for i in range(len(best_solution) - 1):
         segment = get_path_from_cache_or_calculate(best_solution[i], best_solution[i + 1], _terrain_map, path_cache)
-        final_path.extend(segment[1:])  # добавляем без начальной точки сегмента
-    # print(f"Итоговый путь: {final_path}")
+        final_path.extend(segment)  # Добавляем весь сегмент
+    print(
+        f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
+
     return final_path
