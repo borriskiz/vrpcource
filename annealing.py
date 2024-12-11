@@ -6,6 +6,7 @@ from paths import get_path_from_cache_or_calculate, calculate_path_length
 
 path_cache = {}
 
+
 # Функция для генерации соседнего маршрута (изменение порядка промежуточных точек)
 def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     new_route = route.copy()
@@ -13,6 +14,7 @@ def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     idx1, idx2 = random.sample(range(1, len(route) - 1), 2)
     new_route[idx1], new_route[idx2] = new_route[idx2], new_route[idx1]  # Меняем местами их
     return new_route
+
 
 # Функция для расчета длины пути с использованием get_path_from_cache_or_calculate
 def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray) -> float:
@@ -25,6 +27,7 @@ def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray)
 
     # Подсчитываем стоимость пути
     return calculate_path_length(total_path, _terrain_map)
+
 
 # Функция для симулированного отжига
 def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
@@ -72,17 +75,14 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
         if temperature < 1e-5:
             break
 
-        # Понижаем скорость охлаждения на каждом шаге (вы можете настроить)
+        # Понижаем скорость охлаждения на каждом шаге
         if iteration % 100 == 0:
-            print(f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
+            print(
+                f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
 
-    # Возвращаем лучшее найденное решение
-    # Здесь обязательно добавляем промежуточные точки в итоговый путь
     final_path = [_start]  # Начальная точка
     for i in range(len(best_solution) - 1):
         segment = get_path_from_cache_or_calculate(best_solution[i], best_solution[i + 1], _terrain_map, path_cache)
-        final_path.extend(segment)  # Добавляем весь сегмент
-    print(
-        f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
+        final_path.extend(segment)
 
     return final_path

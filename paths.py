@@ -4,6 +4,7 @@ import numpy as np
 
 height_weight: float = 200
 
+
 # Получение пути из кэша
 def get_path_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int], terrain_map: np.ndarray,
                                      _path_cache: dict) -> List[
