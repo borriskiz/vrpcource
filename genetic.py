@@ -2,7 +2,7 @@ from typing import List, Tuple
 import random
 import numpy as np
 from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
-import matplotlib.pyplot as plt
+from map import plot_generation_data
 
 path_cache = {}
 path_length_cache = {}
@@ -148,10 +148,10 @@ def check_valid_route(route: List[int]) -> bool:
     return len(set(route)) == len(route)
 
 
-# Генетический алгоритм
 def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
                               _terrain_map: np.ndarray, _population_size: int, _generations: int,
-                              _mutation_rate: float, _tournament_size: int) -> List[Tuple[int, int]]:
+                              _mutation_rate: float, _tournament_size: int) -> List[
+    Tuple[int, int]]:
     # Убираем начальную и конечную точку из списка точек
     points = [point for point in _points if point != _start and point != _end]
 
@@ -245,24 +245,6 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
     # Построение графика, если plot_graph == True
     if plot_graph:
-        plt.figure(figsize=(10, 6))
-
-        # Отображаем облако значений длин путей для каждой особи
-        for generation in range(_generations):
-            plt.scatter([generation] * len(generation_lengths[generation]), generation_lengths[generation],
-                        color='grey', alpha=0.3)
-
-        # Отображаем среднюю длину пути для каждого поколения
-        plt.plot(range(_generations), average_lengths, color='red', label='Средняя длина пути', linewidth=3)
-
-        # Отображаем минимальную длину пути для каждого поколения
-        plt.plot(range(_generations), min_lengths, color='green', label='Минимальная длина пути', linewidth=3)
-
-        plt.title("Зависимость длин путей от поколения")
-        plt.xlabel("Поколение")
-        plt.ylabel("Длина пути")
-        plt.legend()
-        plt.grid(True)
-        plt.show()
+        plot_generation_data(generation_lengths, average_lengths, min_lengths, _generations)
 
     return final_path

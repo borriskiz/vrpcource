@@ -92,3 +92,26 @@ def generate_random_points(_start: Tuple[int, int], _end: Tuple[int, int], _num_
             _points.append(new_point)
 
     return _points
+
+
+def plot_generation_data(generation_lengths: List[List[int]], average_lengths, min_lengths,
+                         _generations: int):
+    plt.figure(figsize=(10, 6))
+
+    # Отображаем облако значений длин путей для каждой особи
+    for generation in range(_generations):
+        plt.scatter([generation] * len(generation_lengths[generation]), generation_lengths[generation],
+                    color='grey', alpha=0.3)
+
+    # Отображаем среднюю длину пути для каждого поколения
+    plt.plot(range(_generations), average_lengths, color='red', label='Средняя длина пути', linewidth=3)
+
+    # Отображаем минимальную длину пути для каждого поколения
+    plt.plot(range(_generations), min_lengths, color='green', label='Минимальная длина пути', linewidth=3)
+
+    plt.title("Зависимость длин путей от поколения")
+    plt.xlabel("Поколение")
+    plt.ylabel("Длина пути")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
