@@ -90,14 +90,17 @@ if do_original:
     plt.title("Оригинальный ландшафт")
     plt.legend()
     plt.show()
+
 if do_a_star_forward:
-    # Поиск маршрута методом грубой силы
+    # Поиск маршрута от начала до конца
     path_a_star_forward: List[Tuple[int, int]] = a_star_path(start, end, terrain_map)
     visualize_route(path_a_star_forward, "A* start - end", start, [], end, terrain_map)
+
 if do_a_star_backward:
-    # Поиск маршрута методом грубой силы
+    # Поиск маршрута от конца до начала
     path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map)
     visualize_route(path_a_star_backward, "A* end - start", end, [], start, terrain_map)
+
 if do_brute_force:
     # Поиск маршрута методом грубой силы
     path_brute_force: List[Tuple[int, int]] = brute_force_routing(start, points, end, terrain_map)

@@ -83,17 +83,17 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
             best_solution = current_solution
             best_cost = current_cost
 
+        # Понижаем скорость охлаждения на каждом шаге
+        if iteration % 100 == 0:
+            print(
+                f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
+
         # Понижение температуры
         temperature *= _cooling_rate
 
         # Если температура слишком мала, прекращаем итерации
         if temperature < 1e-5:
             break
-
-        # Понижаем скорость охлаждения на каждом шаге
-        if iteration % 100 == 0:
-            print(
-                f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
 
     final_path = [_start]  # Начальная точка
     for i in range(len(best_solution) - 1):
