@@ -10,14 +10,14 @@ from typing import List, Tuple
 
 # Параметры выполняемых опытов
 do_original: bool = False
-do_a_star_forward: bool = True
-do_a_star_backward: bool = True
-do_dijkstra_forward: bool = True
-do_dijkstra_backward: bool = True
+do_a_star_forward: bool = False
+do_a_star_backward: bool = False
+do_dijkstra_forward: bool = False
+do_dijkstra_backward: bool = False
 
 do_brute_force: bool = False
-do_nearest_neighbor: bool = True
-do_annealing: bool = True
+do_nearest_neighbor: bool = False
+do_annealing: bool = False
 do_genetic: bool = True
 
 # Параметры карты
