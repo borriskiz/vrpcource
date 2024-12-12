@@ -2,6 +2,7 @@ from typing import List, Tuple
 import random
 import numpy as np
 from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
+import matplotlib.pyplot as plt
 
 path_cache = {}
 path_length_cache = {}
@@ -9,6 +10,7 @@ path_length_cache = {}
 # Счетчик проверок путей
 path_check_count: int = 0
 output_gene: bool = False
+plot_graph: bool = True
 
 
 # Мутация - инвертирование части отрезка
@@ -159,8 +161,16 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
     best_solution = None
     best_length = float('inf')
 
+    # Списки для хранения данных для графика
+    generation_lengths = []  # Список длин путей для каждого поколения
+    average_lengths = []  # Список средних длин путей для каждого поколения
+    min_lengths = []  # Список минимальных длин путей для каждого поколения
+
     for generation in range(_generations):
         evaluated_population = []
+        generation_total_length = 0  # Для подсчета средней длины в поколении
+        generation_min_length = float('inf')  # Для подсчета минимальной длины в поколении
+
         for route in population:
             # Вставляем начальную и конечную точку в начало и конец маршрута
             full_route = [_start] + [points[i] for i in route] + [_end]
@@ -174,17 +184,28 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
             length = 0.0
             for i in range(len(final_path) - 1):
                 length += get_path_length_from_cache_or_calculate(final_path[i], final_path[i + 1], _terrain_map,
-                                                                  path_cache,
-                                                                  path_length_cache)
+                                                                  path_cache, path_length_cache)
             evaluated_population.append((route, length))
+            generation_total_length += length
+
+            # Обновляем минимальную длину для поколения
+            if length < generation_min_length:
+                generation_min_length = length
 
             if length < best_length:
                 best_length = length
                 best_solution = full_route
 
+        # Сортируем популяцию по длине пути
         evaluated_population.sort(key=lambda x: x[1])
         best_routes = [route for route, _ in evaluated_population[:_population_size // 2]]
 
+        # Сохраняем информацию о длинах для графика
+        generation_lengths.append([length for _, length in evaluated_population])
+        average_lengths.append(generation_total_length / len(population))
+        min_lengths.append(generation_min_length)
+
+        # Создаем новую популяцию
         new_population = best_routes[:]
 
         while len(new_population) < _population_size:
@@ -221,4 +242,27 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
     path_cache.clear()
     path_length_cache.clear()
+
+    # Построение графика, если plot_graph == True
+    if plot_graph:
+        plt.figure(figsize=(10, 6))
+
+        # Отображаем облако значений длин путей для каждой особи
+        for generation in range(_generations):
+            plt.scatter([generation] * len(generation_lengths[generation]), generation_lengths[generation],
+                        color='grey', alpha=0.3)
+
+        # Отображаем среднюю длину пути для каждого поколения
+        plt.plot(range(_generations), average_lengths, color='red', label='Средняя длина пути', linewidth=3)
+
+        # Отображаем минимальную длину пути для каждого поколения
+        plt.plot(range(_generations), min_lengths, color='green', label='Минимальная длина пути', linewidth=3)
+
+        plt.title("Зависимость длин путей от поколения")
+        plt.xlabel("Поколение")
+        plt.ylabel("Длина пути")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
     return final_path
