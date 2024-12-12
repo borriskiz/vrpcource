@@ -2,9 +2,10 @@ import random
 import math
 from typing import List, Tuple
 import numpy as np
-from paths import get_path_from_cache_or_calculate, calculate_path_length
+from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
 
 path_cache = {}
+path_length_cache = {}
 
 
 # Функция для генерации соседнего маршрута (изменение порядка промежуточных точек)
@@ -16,17 +17,22 @@ def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     return new_route
 
 
-# Функция для расчета длины пути с использованием get_path_from_cache_or_calculate
+# Функция для расчета длины пути с использованием кэша
 def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray) -> float:
     total_path = []
 
     # Рассчитываем путь от начальной точки до первой промежуточной
+    total_cost = 0.0
     for i in range(len(route) - 1):
-        segment = get_path_from_cache_or_calculate(route[i], route[i + 1], _terrain_map, path_cache)
+        # Проверяем, есть ли путь в кэше
+        segment = get_path_from_cache_or_calculate(route[i], route[i + 1], _terrain_map, path_cache, path_length_cache)
         total_path.extend(segment)  # Добавляем все точки сегмента, включая начальную
 
-    # Подсчитываем стоимость пути
-    return calculate_path_length(total_path, _terrain_map)
+        # Рассчитываем стоимость пути
+        total_cost += get_path_length_from_cache_or_calculate(route[i], route[i + 1], _terrain_map, path_cache,
+                                                              path_length_cache)
+
+    return total_cost
 
 
 # Функция для симулированного отжига
@@ -82,7 +88,8 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
 
     final_path = [_start]  # Начальная точка
     for i in range(len(best_solution) - 1):
-        segment = get_path_from_cache_or_calculate(best_solution[i], best_solution[i + 1], _terrain_map, path_cache)
+        segment = get_path_from_cache_or_calculate(best_solution[i], best_solution[i + 1], _terrain_map, path_cache,
+                                                   path_length_cache)
         final_path.extend(segment)
 
     return final_path

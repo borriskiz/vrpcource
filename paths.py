@@ -5,10 +5,9 @@ import numpy as np
 height_weight: float = 200
 
 
-# Получение пути из кэша
+# Получение пути из кэша (с добавлением кэша длины пути)
 def get_path_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int], terrain_map: np.ndarray,
-                                     _path_cache: dict) -> List[
-    Tuple[int, int]]:
+                                     _path_cache: dict, _path_length_cache: dict) -> List[Tuple[int, int]]:
     # Проверка, есть ли уже путь в кэше
     if (start, end) in _path_cache:
         return _path_cache[(start, end)]
@@ -16,7 +15,29 @@ def get_path_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int
     # Если пути нет в кэше, вычисляем его с использованием A* и сохраняем в кэш
     path = a_star_path(start, end, terrain_map)
     _path_cache[(start, end)] = path
+
+    # Также вычисляем длину пути и сохраняем ее в кэш
+    path_length = calculate_path_length(path, terrain_map)
+    _path_length_cache[(start, end)] = path_length
+
     return path
+
+
+# Получение длины пути из кэша (если есть)
+def get_path_length_from_cache_or_calculate(start: Tuple[int, int], end: Tuple[int, int], terrain_map: np.ndarray,
+                                            _path_cache: dict, _path_length_cache: dict) -> float:
+    # Проверка, есть ли длина пути в кэше
+    if (start, end) in _path_length_cache:
+        return _path_length_cache[(start, end)]
+
+    # Если длина пути нет в кэше, получаем путь из кэша или вычисляем его
+    path = get_path_from_cache_or_calculate(start, end, terrain_map, _path_cache, _path_length_cache)
+
+    # Рассчитываем и сохраняем длину пути в кэш
+    path_length = calculate_path_length(path, terrain_map)
+    _path_length_cache[(start, end)] = path_length
+
+    return path_length
 
 
 # Класс для узлов в графе

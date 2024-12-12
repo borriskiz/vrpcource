@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 # Параметры выполняемых опытов
-do_original: bool = True
+do_original: bool = False
 do_brute_force: bool = False
 do_nearest_neighbor: bool = True
 do_annealing: bool = True

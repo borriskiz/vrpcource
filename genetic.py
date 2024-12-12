@@ -1,9 +1,10 @@
 from typing import List, Tuple
 import random
 import numpy as np
-from paths import calculate_path_length, get_path_from_cache_or_calculate
+from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
 
 path_cache = {}
+path_length_cache = {}
 
 
 # Мутация - инвертирование част отрезка
@@ -104,18 +105,29 @@ def pmx_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int]]
 
 
 # Турнирный отбор с агрессивным отбором лучших особей
-def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray,
-                         _tournament_size: int) -> \
+
+def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray, _tournament_size: int) -> \
         List[Tuple[int, int]]:
     tournament = random.sample(population, _tournament_size)
-    evaluated_tournament = [(route, calculate_path_length(route, _terrain_map)) for route in tournament]
-    evaluated_tournament.sort(key=lambda x: x[1])  # Сортируем по длине пути
 
-    # Проверка, что лучший маршрут корректно выбран
+    evaluated_tournament = []
+    for route in tournament:
+        total_length = 0
+        # Рассчитываем длину пути для каждого маршрута, используя кэш для сегментов
+        for i in range(len(route) - 1):
+            total_length += get_path_length_from_cache_or_calculate(route[i], route[i + 1], _terrain_map,
+                                                                    path_cache, path_length_cache)
+
+        evaluated_tournament.append((route, total_length))
+
+    # Сортируем по длине пути
+    evaluated_tournament.sort(key=lambda x: x[1])
+
     best_route = evaluated_tournament[0][0]
     assert best_route is not None, "Лучший маршрут не может быть пустым"
     assert len(best_route) == len(population[
-                                      0]), f"Размер маршрута несоответствует ожиданиям. Ожидалось {len(population[0])}, но получено {len(best_route)}"
+                                      0]), (f"Размер маршрута несоответствует ожиданиям. "
+                                            f"Ожидалось {len(population[0])}, но получено {len(best_route)}")
     assert check_valid_route(best_route), "Лучший маршрут невалиден."
 
     return best_route
@@ -160,9 +172,15 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
             final_path = []
             for j in range(len(full_route) - 1):
-                segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map, path_cache)
+                segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map, path_cache,
+                                                           path_length_cache)
                 final_path.extend(segment[:])  # исключаем начальную точку сегмента
-            length = calculate_path_length(final_path, _terrain_map)
+            length = 0.0
+            for i in range(len(final_path) - 1):
+                # Рассчитываем стоимость пути
+                length += get_path_length_from_cache_or_calculate(final_path[i], final_path[i + 1], _terrain_map,
+                                                                  path_cache,
+                                                                  path_length_cache)
             evaluated_population.append((route, length))
 
             # Обновляем лучший маршрут, если найден более короткий
@@ -204,7 +222,8 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
     final_path = []
     for j in range(len(best_solution) - 1):
-        segment = get_path_from_cache_or_calculate(best_solution[j], best_solution[j + 1], _terrain_map, path_cache)
+        segment = get_path_from_cache_or_calculate(best_solution[j], best_solution[j + 1], _terrain_map, path_cache,
+                                                   path_length_cache)
         final_path.extend(segment[1:])
     final_path = [_start] + final_path
     # print(f"Итоговый путь: {final_path}")
