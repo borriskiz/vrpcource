@@ -91,5 +91,9 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
         segment = get_path_from_cache_or_calculate(best_solution[i], best_solution[i + 1], _terrain_map, path_cache,
                                                    path_length_cache)
         final_path.extend(segment)
+    # Выводим количество просчитанных путей
+    print(f"Количество просчитанных путей: {len(path_cache)}")
 
+    path_cache.clear()  # Очищаем кэш путей после завершения маршрута
+    path_length_cache.clear()  # Очищаем кэш длин путей после завершения маршрута
     return final_path

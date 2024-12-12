@@ -48,4 +48,10 @@ def brute_force_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]],
             final_path = full_path
     # print(f"Итоговый путь: {final_path}")
 
+    # Выводим количество просчитанных путей
+    print(f"Количество просчитанных путей: {len(path_cache)}")
+
+    path_cache.clear()  # Очищаем кэш путей после завершения маршрута
+    path_length_cache.clear()  # Очищаем кэш длин путей после завершения маршрута
+
     return final_path

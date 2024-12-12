@@ -10,7 +10,7 @@ from typing import List, Tuple
 
 # Параметры выполняемых опытов
 do_original: bool = False
-do_brute_force: bool = False
+do_brute_force: bool = True
 do_nearest_neighbor: bool = True
 do_annealing: bool = True
 do_genetic: bool = True
@@ -29,7 +29,7 @@ lacunarity: float = 2.0  # Частота осцилляций
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
 num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 0  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
+choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
 
 # Параметры генетического метода
 population_size: int = 100  # Размер популяции

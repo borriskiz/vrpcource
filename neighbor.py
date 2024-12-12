@@ -32,8 +32,11 @@ def nearest_neighbor_routing(_start: Tuple[int, int], _points: List[Tuple[int, i
                                                           path_length_cache)
     final_path.extend(final_path_segment[1:])
 
+    # print(f"Итоговый путь: {final_path}")
+    # Выводим количество просчитанных путей
+    print(f"Количество просчитанных путей: {len(path_cache)}")
+
     path_cache.clear()  # Очищаем кэш путей после завершения маршрута
     path_length_cache.clear()  # Очищаем кэш длин путей после завершения маршрута
 
-    # print(f"Итоговый путь: {final_path}")
     return final_path
