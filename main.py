@@ -10,7 +10,7 @@ from typing import List, Tuple
 
 # Параметры выполняемых опытов
 do_original: bool = False
-do_brute_force: bool = True
+do_brute_force: bool = False
 do_nearest_neighbor: bool = True
 do_annealing: bool = True
 do_genetic: bool = True
@@ -29,7 +29,7 @@ lacunarity: float = 2.0  # Частота осцилляций
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
 num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
+choose_points: int = 0  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
 
 # Параметры генетического метода
 population_size: int = 100  # Размер популяции
@@ -47,7 +47,7 @@ def visualize_route(_path: List[Tuple[int, int]], _algorithm_name: str, _start: 
                     _points: List[Tuple[int, int]], _end: Tuple[int, int], _terrain_map: np.ndarray):
     # Расчет длины пути и округление
     path_length = round(calculate_path_length(_path, _terrain_map), 3)
-    print(f"Длина пути ({_algorithm_name}): {path_length}")
+    print(f"Длина пути ({_algorithm_name}): {path_length}\n")
 
     # Визуализация пути
     prepare_basic_map(_start, _end, _points, _terrain_map)

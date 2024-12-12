@@ -6,8 +6,11 @@ from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_o
 path_cache = {}
 path_length_cache = {}
 
+# Счетчик проверок путей
+path_check_count = 0
 
-# Мутация - инвертирование част отрезка
+
+# Мутация - инвертирование части отрезка
 def inverse_mutation(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     mutated_route = route.copy()
     idx1, idx2 = sorted(random.sample(range(len(route)), 2))
@@ -54,26 +57,19 @@ def diversified_mutation(_route: List[Tuple[int, int]], _generation: int, _max_g
 
 
 def order_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-    # Размер маршрута
     size = len(parent1)
-
-    # Выбираем случайный отрезок для обмена
     _start, _end = sorted(random.sample(range(size), 2))
 
-    # Сохраняем часть маршрута из первого родителя
-    child = [(-1, -1)] * size  # Маркер -1, который будет использоваться для пустых мест
+    child = [(-1, -1)] * size
     child[_start:_end + 1] = parent1[_start:_end + 1]
 
-    # Заполняем оставшиеся позиции второго родителя
     current_position = (_end + 1) % size
     for point in parent2:
         if point not in child:
-            # Ищем первое свободное место
             while child[current_position] != (-1, -1):
                 current_position = (current_position + 1) % size
             child[current_position] = point
 
-    # Проверка, что все позиции заполнены
     if (-1, -1) in child:
         raise ValueError("Не все позиции заполнены корректно.")
 
@@ -83,29 +79,25 @@ def order_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int
 # Partially Mapped Crossover (PMX)
 def pmx_crossover(parent1: List[Tuple[int, int]], parent2: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
     size = len(parent1)
-    start, end = sorted(random.sample(range(size), 2))  # Случайный диапазон для обмена
-    child = [(-1, -1)] * size  # Инициализируем пустой маршрут, маркером (-1, -1)
+    start, end = sorted(random.sample(range(size), 2))
+    child = [(-1, -1)] * size
 
-    # Копируем сегмент из первого родителя в новый маршрут
     for i in range(start, end + 1):
         child[i] = parent1[i]
 
-    # Вставляем недостающие элементы из второго родителя
     for i in range(size):
-        if child[i] == (-1, -1):  # Если позиция ещё пустая
-            # Ищем элемент из второго родителя, который ещё не вставлен в ребёнка
+        if child[i] == (-1, -1):
             for j in range(size):
                 if parent2[j] not in child:
                     child[i] = parent2[j]
                     break
-    # Проверка, что все позиции заполнены
+
     if (-1, -1) in child:
         raise ValueError("Не все позиции заполнены корректно.")
     return child
 
 
 # Турнирный отбор с агрессивным отбором лучших особей
-
 def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray, _tournament_size: int) -> \
         List[Tuple[int, int]]:
     tournament = random.sample(population, _tournament_size)
@@ -113,21 +105,20 @@ def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: 
     evaluated_tournament = []
     for route in tournament:
         total_length = 0
-        # Рассчитываем длину пути для каждого маршрута, используя кэш для сегментов
         for i in range(len(route) - 1):
+            # Подсчитываем количество проверок путей
+            global path_check_count
+            path_check_count += 1  # Каждая проверка пути увеличивает счетчик
             total_length += get_path_length_from_cache_or_calculate(route[i], route[i + 1], _terrain_map,
                                                                     path_cache, path_length_cache)
 
         evaluated_tournament.append((route, total_length))
 
-    # Сортируем по длине пути
     evaluated_tournament.sort(key=lambda x: x[1])
 
     best_route = evaluated_tournament[0][0]
     assert best_route is not None, "Лучший маршрут не может быть пустым"
-    assert len(best_route) == len(population[
-                                      0]), (f"Размер маршрута несоответствует ожиданиям. "
-                                            f"Ожидалось {len(population[0])}, но получено {len(best_route)}")
+    assert len(best_route) == len(population[0]), f"Размер маршрута несоответствует ожиданиям."
     assert check_valid_route(best_route), "Лучший маршрут невалиден."
 
     return best_route
@@ -137,17 +128,14 @@ def tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: 
 def adaptive_tournament_selection(population: List[List[Tuple[int, int]]], _terrain_map: np.ndarray,
                                   generation: int, _generations: int, _tournament_base_size: int) -> List[
     Tuple[int, int]]:
-    # Увеличиваем размер турнира на поздних этапах
     tournament_size = max(_tournament_base_size, int(_tournament_base_size * (1 + generation / _generations)))
     return tournament_selection(population, _terrain_map, tournament_size)
 
 
-# Проверка, что передаваемые точки не являются None
+# Проверка маршрута
 def check_valid_route(route: List[Tuple[int, int]]) -> bool:
-    # Проверка на наличие None или маршрута длины 1
     if None in route or (-1, -1) in route or len(route) < 2:
         return False
-    # Также можно добавить проверку на дублирующиеся точки
     return len(set(route)) == len(route)
 
 
@@ -155,44 +143,39 @@ def check_valid_route(route: List[Tuple[int, int]]) -> bool:
 def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
                               _terrain_map: np.ndarray, _population_size: int, _generations: int,
                               _mutation_rate: float, _tournament_size: int) -> List[Tuple[int, int]]:
-    # Инициализация популяции
     population = [random.sample(_points, len(_points)) for _ in range(_population_size)]
 
     best_solution = None
     best_length = float('inf')
 
     for generation in range(_generations):
-        # Оценка маршрутов
         evaluated_population = []
         for route in population:
             full_route = [_start] + route + [_end]
 
             if not check_valid_route(full_route):
-                continue  # Пропускаем невалидные маршруты
+                continue
 
             final_path = []
             for j in range(len(full_route) - 1):
                 segment = get_path_from_cache_or_calculate(full_route[j], full_route[j + 1], _terrain_map, path_cache,
                                                            path_length_cache)
-                final_path.extend(segment[:])  # исключаем начальную точку сегмента
+                final_path.extend(segment[:])
+
             length = 0.0
             for i in range(len(final_path) - 1):
-                # Рассчитываем стоимость пути
                 length += get_path_length_from_cache_or_calculate(final_path[i], final_path[i + 1], _terrain_map,
                                                                   path_cache,
                                                                   path_length_cache)
             evaluated_population.append((route, length))
 
-            # Обновляем лучший маршрут, если найден более короткий
             if length < best_length:
                 best_length = length
                 best_solution = full_route
 
-        # Сортировка по длине пути
         evaluated_population.sort(key=lambda x: x[1])
         best_routes = [route for route, _ in evaluated_population[:_population_size // 2]]
 
-        # Новый набор популяции с элитизмом
         new_population = best_routes[:]
 
         while len(new_population) < _population_size:
@@ -204,7 +187,6 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
             child = pmx_crossover(parent1, parent2)
 
             if random.random() < _mutation_rate:
-                # Применяем диверсифицированную мутацию
                 child = diversified_mutation(child, generation, _generations)
 
             if check_valid_route(child):
@@ -212,11 +194,9 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
 
         population = new_population
 
-        # Печать прогресса
         if generation % 10 == 0:
             print(f"Поколение {generation}, длина лучшего маршрута: {best_length}")
 
-    # Возвращаем лучший найденный маршрут
     if best_solution is None:
         raise ValueError("Не найдено корректного маршрута.")
 
@@ -226,10 +206,10 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
                                                    path_length_cache)
         final_path.extend(segment[1:])
     final_path = [_start] + final_path
-    # print(f"Итоговый путь: {final_path}")
-    # Выводим количество просчитанных путей
-    print(f"Количество просчитанных путей: {len(path_cache)}")
 
-    path_cache.clear()  # Очищаем кэш путей после завершения маршрута
-    path_length_cache.clear()  # Очищаем кэш длин путей после завершения маршрута
+    print(f"Количество проверок путей: {path_check_count}")  # Выводим количество проверок путей
+    print(f"Количество просчитанных путей: {len(path_length_cache)}")
+
+    path_cache.clear()
+    path_length_cache.clear()
     return final_path

@@ -7,6 +7,9 @@ from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_o
 path_cache = {}
 path_length_cache = {}
 
+# Счетчики для подсчета проверок путей
+path_check_count = 0
+
 
 # Функция для генерации соседнего маршрута (изменение порядка промежуточных точек)
 def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
@@ -19,13 +22,17 @@ def generate_neighbor(route: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
 
 # Функция для расчета длины пути с использованием кэша
 def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray) -> float:
+    global path_check_count
+
     total_path = []
+    total_cost = 0.0
 
     # Рассчитываем путь от начальной точки до первой промежуточной
-    total_cost = 0.0
     for i in range(len(route) - 1):
         # Проверяем, есть ли путь в кэше
+        path_check_count += 1  # Каждая проверка пути увеличивает счетчик
         segment = get_path_from_cache_or_calculate(route[i], route[i + 1], _terrain_map, path_cache, path_length_cache)
+
         total_path.extend(segment)  # Добавляем все точки сегмента, включая начальную
 
         # Рассчитываем стоимость пути
@@ -39,6 +46,8 @@ def calculate_total_cost(route: List[Tuple[int, int]], _terrain_map: np.ndarray)
 def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
                                 _terrain_map: np.ndarray, _initial_temp: float, _cooling_rate: float,
                                 _iterations: int) -> List[Tuple[int, int]]:
+    global path_check_count
+
     # Инициализация начального решения: стартовая точка + промежуточные точки + конечная точка
     current_solution = [_start] + _points + [_end]
     current_cost = calculate_total_cost(current_solution, _terrain_map)
@@ -91,9 +100,13 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
         segment = get_path_from_cache_or_calculate(best_solution[i], best_solution[i + 1], _terrain_map, path_cache,
                                                    path_length_cache)
         final_path.extend(segment)
-    # Выводим количество просчитанных путей
-    print(f"Количество просчитанных путей: {len(path_cache)}")
 
-    path_cache.clear()  # Очищаем кэш путей после завершения маршрута
-    path_length_cache.clear()  # Очищаем кэш длин путей после завершения маршрута
+    # Выводим количество просчитанных путей и проверок
+    print(f"Количество проверок путей: {path_check_count}")  # Выводим количество проверок путей
+    print(f"Количество просчитанных путей: {len(path_length_cache)}")
+
+    # Очищаем кэш путей после завершения маршрута
+    path_cache.clear()
+    path_length_cache.clear()
+
     return final_path
