@@ -3,7 +3,7 @@ from neighbor import nearest_neighbor_routing
 from genetic import genetic_algorithm_routing
 from brute_force import brute_force_routing
 from annealing import simulated_annealing_routing
-from paths import calculate_path_length, a_star_path
+from paths import calculate_path_length, a_star_path, dijkstra_path
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
@@ -12,6 +12,8 @@ from typing import List, Tuple
 do_original: bool = False
 do_a_star_forward: bool = True
 do_a_star_backward: bool = True
+do_dijkstra_forward: bool = True
+do_dijkstra_backward: bool = True
 
 do_brute_force: bool = False
 do_nearest_neighbor: bool = True
@@ -100,6 +102,16 @@ if do_a_star_backward:
     # Поиск маршрута от конца до начала
     path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map)
     visualize_route(path_a_star_backward, "A* end - start", end, [], start, terrain_map)
+
+if do_dijkstra_forward:
+    # Поиск маршрута от начала до конца
+    path_dijkstra_forward: List[Tuple[int, int]] = dijkstra_path(start, end, terrain_map)
+    visualize_route(path_dijkstra_forward, "Dijkstra start - end", start, [], end, terrain_map)
+
+if do_dijkstra_backward:
+    # Поиск маршрута от конца до начала
+    path_dijkstra_backward: List[Tuple[int, int]] = dijkstra_path(end, start, terrain_map)
+    visualize_route(path_dijkstra_backward, "Dijkstra end - start", end, [], start, terrain_map)
 
 if do_brute_force:
     # Поиск маршрута методом грубой силы

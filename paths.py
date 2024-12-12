@@ -121,3 +121,53 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
                 came_from[neighbor_pos] = current_node  # Отслеживаем путь
 
     return []
+
+
+# Поиск пути с использованием алгоритма Дейкстры
+def dijkstra_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
+    open_list: List[Node] = []
+    closed_list: set[Tuple[int, int]] = set()
+    came_from: dict[Tuple[int, int], Node] = {}  # Словарь для отслеживания пути
+    g_costs: dict[Tuple[int, int], float] = {}  # Словарь для хранения g_cost узлов
+
+    # Инициализация стартового узла
+    start_node: Node = Node(_start, 0, 0)  # Для Дейкстры h_cost не используется
+    heapq.heappush(open_list, start_node)
+    g_costs[_start] = 0  # Начальная стоимость пути для старта
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # Возможные направления для движения
+
+    while open_list:
+        # Берём узел с минимальной g_cost
+        current_node: Node = heapq.heappop(open_list)
+
+        # Если достигли конечной точки, восстанавливаем путь
+        if current_node.position == _end:
+            path = []
+            while current_node:
+                path.append(current_node.position)
+                current_node = came_from.get(current_node.position)
+            return path[::-1]  # Возвращаем путь в правильном порядке
+
+        closed_list.add(current_node.position)
+
+        # Проверяем соседей
+        for neighbor in directions:
+            neighbor_pos = (current_node.position[0] + neighbor[0], current_node.position[1] + neighbor[1])
+            if 0 <= neighbor_pos[0] < _terrain_map.shape[0] and 0 <= neighbor_pos[1] < _terrain_map.shape[1]:
+                if neighbor_pos in closed_list:
+                    continue
+
+                # Расчёт g_cost для соседа: сумма стоимости пути до текущего узла и высоты
+                terrain_cost = calculate_height(current_node.position, neighbor_pos, _terrain_map)
+                g_cost = current_node.g_cost + terrain_cost
+
+                # Проверяем, если этот сосед уже в открытом списке с более высокой стоимостью, пропускаем его
+                if neighbor_pos in g_costs and g_costs[neighbor_pos] <= g_cost:
+                    continue
+
+                g_costs[neighbor_pos] = g_cost  # Обновляем g_cost для соседа
+                neighbor_node = Node(neighbor_pos, g_cost, 0)  # h_cost = 0 для Дейкстры
+                heapq.heappush(open_list, neighbor_node)
+                came_from[neighbor_pos] = current_node  # Отслеживаем путь
+
+    return []  # Если путь не найден
