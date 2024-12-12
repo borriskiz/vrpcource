@@ -3,13 +3,16 @@ from neighbor import nearest_neighbor_routing
 from genetic import genetic_algorithm_routing
 from brute_force import brute_force_routing
 from annealing import simulated_annealing_routing
-from paths import calculate_path_length
+from paths import calculate_path_length, a_star_path
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 # Параметры выполняемых опытов
 do_original: bool = False
+do_a_star_forward: bool = True
+do_a_star_backward: bool = True
+
 do_brute_force: bool = False
 do_nearest_neighbor: bool = True
 do_annealing: bool = True
@@ -29,7 +32,7 @@ lacunarity: float = 2.0  # Частота осцилляций
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
 num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 0  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
+choose_points: int = 20  # 0 Генерировать ли случайные числа, 6 чисел, 10 чисел, 20 чисел
 
 # Параметры генетического метода
 population_size: int = 100  # Размер популяции
@@ -87,7 +90,14 @@ if do_original:
     plt.title("Оригинальный ландшафт")
     plt.legend()
     plt.show()
-
+if do_a_star_forward:
+    # Поиск маршрута методом грубой силы
+    path_a_star_forward: List[Tuple[int, int]] = a_star_path(start, end, terrain_map)
+    visualize_route(path_a_star_forward, "A* start - end", start, [], end, terrain_map)
+if do_a_star_backward:
+    # Поиск маршрута методом грубой силы
+    path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map)
+    visualize_route(path_a_star_backward, "A* end - start", end, [], start, terrain_map)
 if do_brute_force:
     # Поиск маршрута методом грубой силы
     path_brute_force: List[Tuple[int, int]] = brute_force_routing(start, points, end, terrain_map)
