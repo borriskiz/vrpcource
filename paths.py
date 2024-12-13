@@ -74,7 +74,7 @@ class Node:
 # Эвристическая функция (расстояние Евклида)
 def heuristic(a: Tuple[int, int], b: Tuple[int, int], _terrain_map: np.ndarray) -> float:
     # return np.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + calculate_height(a, b, _terrain_map) ** 2)
-    return abs(a[0] - b[0]) + abs(a[1] - b[1]) + calculate_height(a, b, _terrain_map)
+    return abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(calculate_height(a, b, _terrain_map))
 
 
 # Функция для вычисления высоты между точками
@@ -90,14 +90,13 @@ def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.n
     closed_set: set[Tuple[int, int]] = set()  # Множество посещенных узлов
     came_from: Dict[Tuple[int, int], Node] = {}  # Для восстановления пути
     g_costs: Dict[Tuple[int, int], float] = {}  # Стоимости пути для каждого узла
-    visited_nodes: set[Tuple[int, int]] = set()  # Множество всех посещенных узлов
 
     start_node: Node = Node(start, 0, heuristic(start, end, _terrain_map))
     heapq.heappush(open_list, start_node)
     g_costs[start] = 0  # Начальная стоимость пути для старта
 
     # Направления для поиска соседей (включая диагональные)
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     path = []  # Список для хранения пути
 
@@ -111,11 +110,10 @@ def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.n
                 path.append(current_node.position)
                 current_node = came_from.get(current_node.position)
             if show_visited_nodes:
-                plot_visited_nodes(start, end, visited_nodes, _terrain_map)
+                plot_visited_nodes(start, end, closed_set, _terrain_map)
             return path[::-1]
 
         closed_set.add(current_node.position)
-        visited_nodes.add(current_node.position)  # Добавляем текущий узел в посещенные
 
         for neighbor in directions:
             neighbor_pos = (current_node.position[0] + neighbor[0], current_node.position[1] + neighbor[1])
@@ -126,6 +124,7 @@ def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.n
                     continue
 
                 # Вычисление новых g и h стоимостей для соседа
+                # g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
                 g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
                 h_cost = heuristic(neighbor_pos, end, _terrain_map)
 
