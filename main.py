@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 # Параметры выполняемых тестовых опытов
-do_original: bool = True
+do_original: bool = False
 show_visited_nodes: bool = True
-do_a_star_forward: bool = True
-do_a_star_backward: bool = True
+do_a_star_forward: bool = False
+do_a_star_backward: bool = False
 
 # Параметры выполняемых опытов
 do_brute_force: bool = True
