@@ -135,7 +135,18 @@ def plot_generation_data(_generation_lengths, _average_lengths, _min_lengths,
     plt.legend()
     plt.grid(True)
     plt.show()
+def plot_annealing_data(_costs, _iterations: int):
+    plt.figure(figsize=(10, 6))
 
+    # Отображаем длину пути для каждой итерации
+    plt.plot(range(_iterations), _costs, color='blue', label='Длина пути', linewidth=2)
+
+    plt.title("Зависимость длины пути от итерации в алгоритме имитации отжига")
+    plt.xlabel("Итерация")
+    plt.ylabel("Длина пути")
+    plt.legend()
+    plt.grid(True)
+    plt.show()
 
 def plot_visited_nodes(_start: Tuple[int, int], _end: Tuple[int, int], _visited_nodes: set[Tuple[int, int]],
                        _terrain_map: np.ndarray) -> None:

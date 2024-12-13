@@ -3,12 +3,14 @@ import math
 from typing import List, Tuple
 import numpy as np
 from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
+from map import plot_annealing_data
 
 path_cache = {}
 path_length_cache = {}
 
 # Счетчики для подсчета проверок путей
 path_check_count = 0
+plot_graph: bool = True
 
 
 # Функция для генерации соседнего маршрута (изменение порядка промежуточных точек)
@@ -55,6 +57,9 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
     best_solution = current_solution
     best_cost = current_cost
 
+    # Список для хранения длины пути на каждой итерации
+    costs = [current_cost]
+
     # Начальная температура
     temperature = _initial_temp
 
@@ -88,6 +93,9 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
             print(
                 f"Итерация {iteration}, Текущая стоимость: {current_cost}, Лучшее решение: {best_cost}, Температура: {temperature}")
 
+        # Добавляем текущую длину пути в список для графика
+        costs.append(current_cost)
+
         # Понижение температуры
         temperature *= _cooling_rate
 
@@ -109,4 +117,7 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
     path_cache.clear()
     path_length_cache.clear()
 
+    # Строим график длины пути в зависимости от итерации
+    if plot_graph:
+        plot_annealing_data(costs, len(costs))
     return final_path

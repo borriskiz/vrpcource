@@ -34,7 +34,7 @@ lacunarity: float = 2.0  # Частота осцилляций
 start: Tuple[int, int] = (100, 100)  # Начальная точка
 end: Tuple[int, int] = (400, 400)  # Конечная точка
 num_random_points: int = 20  # Количество случайных точек
-choose_points: int = 8  # 0 Генерировать ли случайные числа, 8 чисел, 10 чисел, 20 чисел
+choose_points: int = 20  # 0 Генерировать ли случайные числа, 8 чисел, 10 чисел, 20 чисел
 
 # Параметры генетического метода
 population_size: int = 100  # Размер популяции
@@ -43,8 +43,8 @@ mutation_rate: float = 0.3  # Вероятность мутации
 tournament_size: int = population_size // 10  # Количество агентов для отбора
 
 # Параметры симулированного отжига
-initial_temp: float = 1000
-cooling_rate: float = 0.998
+initial_temp: float = 2000
+cooling_rate: float = 0.995
 iterations: int = 1000
 
 # Задание точек маршрута

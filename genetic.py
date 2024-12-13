@@ -58,26 +58,6 @@ def diversified_mutation(_route: List[int], _generation: int, _max_generations: 
             return scramble_mutation(_route)
 
 
-def order_crossover(parent1: List[int], parent2: List[int]) -> List[int]:
-    size = len(parent1)
-    _start, _end = sorted(random.sample(range(size), 2))
-
-    child = [-1] * size
-    child[_start:_end + 1] = parent1[_start:_end + 1]
-
-    current_position = (_end + 1) % size
-    for idx in parent2:
-        if idx not in child:
-            while child[current_position] != -1:
-                current_position = (current_position + 1) % size
-            child[current_position] = idx
-
-    if -1 in child:
-        raise ValueError("Не все позиции заполнены корректно.")
-
-    return child
-
-
 # Partially Mapped Crossover (PMX)
 def pmx_crossover(parent1: List[int], parent2: List[int]) -> List[int]:
     size = len(parent1)

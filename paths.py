@@ -4,6 +4,8 @@ import heapq
 import numpy as np
 
 height_weight: float = 200
+# Направления для поиска соседей
+directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
 
 # Функция для вычисления длины маршрута с учетом ландшафта
@@ -93,9 +95,6 @@ def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.n
     start_node: Node = Node(start, 0, heuristic(start, end))
     heapq.heappush(open_list, start_node)
     g_costs[start] = 0  # Начальная стоимость пути для старта
-
-    # Направления для поиска соседей (включая диагональные)
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     path = []  # Список для хранения пути
 
