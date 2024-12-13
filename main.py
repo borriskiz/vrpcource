@@ -9,7 +9,8 @@ import matplotlib.pyplot as plt
 from typing import List, Tuple
 
 # Параметры выполняемых тестовых опытов
-do_original: bool = False
+do_original: bool = True
+show_visited_nodes: bool = True
 do_a_star_forward: bool = True
 do_a_star_backward: bool = True
 
@@ -94,12 +95,12 @@ if do_original:
 
 if do_a_star_forward:
     # Поиск маршрута от начала до конца
-    path_a_star_forward: List[Tuple[int, int]] = a_star_path(start, end, terrain_map, True)
+    path_a_star_forward: List[Tuple[int, int]] = a_star_path(start, end, terrain_map, show_visited_nodes)
     visualize_route(path_a_star_forward, "A* start - end", start, [], end, terrain_map)
 
 if do_a_star_backward:
     # Поиск маршрута от конца до начала
-    path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map, True)
+    path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map, show_visited_nodes)
     visualize_route(path_a_star_backward, "A* end - start", end, [], start, terrain_map)
 
 if do_brute_force:

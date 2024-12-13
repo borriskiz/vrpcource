@@ -127,7 +127,7 @@ def plot_visited_nodes(_start: Tuple[int, int], _end: Tuple[int, int], _visited_
     # Отображаем все посещенные узлы
     visited_x = [pos[1] for pos in _visited_nodes]
     visited_y = [pos[0] for pos in _visited_nodes]
-    plt.scatter(visited_x, visited_y, color="green", s=10, label="Visited Nodes", zorder=3)
+    plt.scatter(visited_x, visited_y, color="green", s=10, label="Посещенные точки", zorder=3)
 
     # Отображаем начальную и конечную точку
     plt.scatter(_start[1], _start[0], color="green", s=150, marker='^', label="Начальная точка", zorder=3,
