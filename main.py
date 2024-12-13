@@ -15,9 +15,9 @@ do_a_star_backward: bool = True
 
 # Параметры выполняемых опытов
 do_brute_force: bool = False
-do_nearest_neighbor: bool = True
-do_annealing: bool = True
-do_genetic: bool = True
+do_nearest_neighbor: bool = False
+do_annealing: bool = False
+do_genetic: bool = False
 
 # Параметры карты
 width: int = 512

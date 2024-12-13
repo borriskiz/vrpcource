@@ -94,7 +94,7 @@ def generate_random_points(_start: Tuple[int, int], _end: Tuple[int, int], _num_
     return _points
 
 
-def plot_generation_data(generation_lengths: List[List[float]], average_lengths, min_lengths,
+def plot_generation_data(generation_lengths, average_lengths, min_lengths,
                          _generations: int):
     plt.figure(figsize=(10, 6))
 
@@ -115,3 +115,26 @@ def plot_generation_data(generation_lengths: List[List[float]], average_lengths,
     plt.legend()
     plt.grid(True)
     plt.show()
+
+
+def plot_visited_nodes(_start: Tuple[int, int], _end: Tuple[int, int], _visited_nodes: set[Tuple[int, int]],
+                       _terrain_map: np.ndarray) -> None:
+    # Визуализируем карту
+    plt.figure(figsize=(10, 10))
+    plt.imshow(_terrain_map, cmap='terrain')
+    plt.colorbar(label="Высота")
+
+    # Отображаем все посещенные узлы
+    visited_x = [pos[1] for pos in _visited_nodes]
+    visited_y = [pos[0] for pos in _visited_nodes]
+    plt.scatter(visited_x, visited_y, color="green", s=10, label="Visited Nodes", zorder=3)
+
+    # Отображаем начальную и конечную точку
+    plt.scatter(_start[1], _start[0], color="green", s=150, marker='^', label="Начальная точка", zorder=3,
+                edgecolor='black', linewidth=2)
+
+    plt.scatter(_end[1], _end[0], color="red", s=150, marker='s', label="Конечная точка", zorder=3,
+                edgecolor='black', linewidth=2)
+
+    plt.legend()
+    plt.show()  # Показываем картину

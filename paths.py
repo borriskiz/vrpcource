@@ -1,8 +1,10 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
+from map import plot_visited_nodes
 import heapq
 import numpy as np
 
 height_weight: float = 200
+show_visited_nodes: bool = True
 
 
 # Функция для вычисления длины маршрута с учетом ландшафта
@@ -57,70 +59,81 @@ class Node:
     def __init__(self, position: Tuple[int, int], g_cost: float = 0.0, h_cost: float = 0.0,
                  parent: 'Node' = None) -> None:
         self.position: Tuple[int, int] = position
-        self.g_cost: float = g_cost
-        self.h_cost: float = h_cost
-        self.f_cost: float = g_cost + h_cost
+        self.g_cost: float = g_cost  # Стоимость пути от старта до текущего узла
+        self.h_cost: float = h_cost  # Эвристическая стоимость от текущего узла до цели
+        self.f_cost: float = g_cost + h_cost  # Общая стоимость (g + h)
         self.parent: 'Node' = parent
 
     def __lt__(self, other: 'Node') -> bool:
         return self.f_cost < other.f_cost
 
+    def __eq__(self, other: 'Node') -> bool:
+        return self.position == other.position
 
-# Эвристическая функция
+
+# Эвристическая функция (расстояние Евклида)
 def heuristic(a: Tuple[int, int], b: Tuple[int, int], _terrain_map: np.ndarray) -> float:
-    # return abs(a[0] - b[0]) + abs(a[1] - b[1])
-    return np.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + calculate_height(a, b, _terrain_map) ** 2)
+    # return np.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + calculate_height(a, b, _terrain_map) ** 2)
+    return abs(a[0] - b[0]) + abs(a[1] - b[1]) + calculate_height(a, b, _terrain_map)
 
 
-# Функция для вычисления длины маршрута с учетом ландшафта
+# Функция для вычисления высоты между точками
 def calculate_height(_from: Tuple[int, int], _to: Tuple[int, int], _terrain_map: np.ndarray) -> float:
-    height1: float = float(_terrain_map[_from[0], _from[1]])
-    height2: float = float(_terrain_map[_to[0], _to[1]])
+    height1 = float(_terrain_map[_from[0], _from[1]])
+    height2 = float(_terrain_map[_to[0], _to[1]])
     return height_weight * abs(height2 - height1)
 
 
-# Поиск пути с использованием A*
-def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
-    open_list: List[Node] = []
-    closed_list: set[Tuple[int, int]] = set()
-    came_from: dict[Tuple[int, int], Node] = {}  # Словарь для отслеживания пути
-    g_costs: dict[Tuple[int, int], float] = {}  # Словарь для хранения g_cost узлов
+# Основная функция поиска пути с использованием A*
+def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
+    open_list: List[Node] = []  # Очередь с приоритетами
+    closed_set: set[Tuple[int, int]] = set()  # Множество посещенных узлов
+    came_from: Dict[Tuple[int, int], Node] = {}  # Для восстановления пути
+    g_costs: Dict[Tuple[int, int], float] = {}  # Стоимости пути для каждого узла
+    visited_nodes: set[Tuple[int, int]] = set()  # Множество всех посещенных узлов
 
-    start_node: Node = Node(_start, 0, heuristic(_start, _end, _terrain_map))
+    start_node: Node = Node(start, 0, heuristic(start, end, _terrain_map))
     heapq.heappush(open_list, start_node)
-    g_costs[_start] = 0  # Начальная стоимость пути для старта
-    # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    g_costs[start] = 0  # Начальная стоимость пути для старта
+
+    # Направления для поиска соседей (включая диагональные)
     directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
+
+    path = []  # Список для хранения пути
 
     while open_list:
         current_node: Node = heapq.heappop(open_list)
 
-        if current_node.position == _end:
-            path = []
+        # Если нашли путь до цели
+        if current_node.position == end:
+            # Восстанавливаем путь от конечного узла до начального
             while current_node:
                 path.append(current_node.position)
                 current_node = came_from.get(current_node.position)
-
+            if show_visited_nodes:
+                plot_visited_nodes(start, end, visited_nodes, _terrain_map)
             return path[::-1]
 
-        closed_list.add(current_node.position)
+        closed_set.add(current_node.position)
+        visited_nodes.add(current_node.position)  # Добавляем текущий узел в посещенные
 
         for neighbor in directions:
             neighbor_pos = (current_node.position[0] + neighbor[0], current_node.position[1] + neighbor[1])
+
+            # Проверка, что сосед в пределах карты
             if 0 <= neighbor_pos[0] < _terrain_map.shape[0] and 0 <= neighbor_pos[1] < _terrain_map.shape[1]:
-                if neighbor_pos in closed_list:
+                if neighbor_pos in closed_set:
                     continue
 
-                # Вычисляем новые g_cost и h_cost
-                # g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
-                g_cost = current_node.g_cost + heuristic(current_node.position, neighbor_pos, _terrain_map)
-                h_cost = heuristic(neighbor_pos, _end, _terrain_map)
+                # Вычисление новых g и h стоимостей для соседа
+                g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
+                h_cost = heuristic(neighbor_pos, end, _terrain_map)
 
-                # Проверяем, если этот сосед уже в открытом списке с более высокой стоимостью, пропускаем его
+                # Если сосед уже в открытом списке с меньшей или равной стоимостью, пропускаем его
                 if neighbor_pos in g_costs and g_costs[neighbor_pos] <= g_cost:
                     continue
 
-                g_costs[neighbor_pos] = g_cost  # Обновляем g_cost для соседа
+                g_costs[neighbor_pos] = g_cost
                 neighbor_node = Node(neighbor_pos, g_cost, h_cost, current_node)
                 heapq.heappush(open_list, neighbor_node)
                 came_from[neighbor_pos] = current_node  # Отслеживаем путь
