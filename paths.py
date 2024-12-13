@@ -13,9 +13,8 @@ def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray)
     for j in range(len(path) - 1):
         x1, y1 = path[j]
         x2, y2 = path[j + 1]
-        # terrain_cost = calculate_height((x1, y1), (x2, y2), _terrain_map)
-        # length += heuristic((x1, y1), (x2, y2), _terrain_map) + terrain_cost
-        length += heuristic((x1, y1), (x2, y2), _terrain_map)
+        terrain_cost = calculate_height((x1, y1), (x2, y2), _terrain_map)
+        length += heuristic((x1, y1), (x2, y2)) + terrain_cost
     return length
 
 
@@ -72,9 +71,9 @@ class Node:
 
 
 # Эвристическая функция (расстояние Евклида)
-def heuristic(a: Tuple[int, int], b: Tuple[int, int], _terrain_map: np.ndarray) -> float:
+def heuristic(a: Tuple[int, int], b: Tuple[int, int]) -> float:
     # return np.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + calculate_height(a, b, _terrain_map) ** 2)
-    return abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(calculate_height(a, b, _terrain_map))
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 
 # Функция для вычисления высоты между точками
@@ -91,7 +90,7 @@ def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.n
     came_from: Dict[Tuple[int, int], Node] = {}  # Для восстановления пути
     g_costs: Dict[Tuple[int, int], float] = {}  # Стоимости пути для каждого узла
 
-    start_node: Node = Node(start, 0, heuristic(start, end, _terrain_map))
+    start_node: Node = Node(start, 0, heuristic(start, end))
     heapq.heappush(open_list, start_node)
     g_costs[start] = 0  # Начальная стоимость пути для старта
 
@@ -124,9 +123,8 @@ def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.n
                     continue
 
                 # Вычисление новых g и h стоимостей для соседа
-                # g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
                 g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
-                h_cost = heuristic(neighbor_pos, end, _terrain_map)
+                h_cost = heuristic(neighbor_pos, end)
 
                 # Если сосед уже в открытом списке с меньшей или равной стоимостью, пропускаем его
                 if neighbor_pos in g_costs and g_costs[neighbor_pos] <= g_cost:
