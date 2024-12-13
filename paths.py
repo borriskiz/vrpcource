@@ -112,7 +112,8 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
                     continue
 
                 # Вычисляем новые g_cost и h_cost
-                g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
+                # g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
+                g_cost = current_node.g_cost + heuristic(current_node.position, neighbor_pos, _terrain_map)
                 h_cost = heuristic(neighbor_pos, _end, _terrain_map)
 
                 # Проверяем, если этот сосед уже в открытом списке с более высокой стоимостью, пропускаем его
