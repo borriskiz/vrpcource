@@ -15,7 +15,7 @@ do_a_star_forward: bool = False
 do_a_star_backward: bool = False
 
 # Параметры выполняемых опытов
-do_brute_force: bool = True
+do_brute_force: bool = False
 do_nearest_neighbor: bool = True
 do_annealing: bool = True
 do_genetic: bool = True
