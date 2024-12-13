@@ -8,11 +8,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Tuple
 
-# Параметры выполняемых опытов
+# Параметры выполняемых тестовых опытов
 do_original: bool = False
 do_a_star_forward: bool = True
 do_a_star_backward: bool = True
 
+# Параметры выполняемых опытов
 do_brute_force: bool = False
 do_nearest_neighbor: bool = True
 do_annealing: bool = True
