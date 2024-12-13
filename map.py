@@ -40,8 +40,9 @@ def prepare_basic_map(_start: Tuple[int, int], _end: Tuple[int, int], _points: L
     plt.colorbar(label="Высота")
 
     # Точки маршрута (пурпурные, большие, с кругами)
-    plt.scatter([p[1] for p in _points], [p[0] for p in _points], color="purple", s=100,
-                marker='o', label="Точки маршрута", zorder=3, alpha=0.7, edgecolor='black')
+    if len(_points) != 0:
+        plt.scatter([p[1] for p in _points], [p[0] for p in _points], color="purple", s=100,
+                    marker='o', label="Точки маршрута", zorder=3, alpha=0.7, edgecolor='black')
     plot_start_and_end(_start, _end)
 
 
@@ -74,6 +75,22 @@ def draw_path(_path: List[Tuple[int, int]]) -> None:
                 zorder=2  # Порядок наложения
             )
             plt.gca().add_patch(arrow)
+
+
+def visualize_route(_path: List[Tuple[int, int]], _path_length: float, _algorithm_name: str, _start: Tuple[int, int],
+                    _points: List[Tuple[int, int]], _end: Tuple[int, int], _terrain_map: np.ndarray):
+    # Расчет длины пути и округление
+    print(f"Длина пути ({_algorithm_name}): {_path_length}\n")
+
+    # Визуализация пути
+    prepare_basic_map(_start, _end, _points, _terrain_map)
+
+    draw_path(_path)
+
+    # Заголовок с длиной пути
+    plt.title(f"{_algorithm_name}, Длина пути: {_path_length}")
+    plt.legend()
+    plt.show()
 
 
 # Функция для генерации случайных точек в пределах определенной области
@@ -130,7 +147,7 @@ def plot_visited_nodes(_start: Tuple[int, int], _end: Tuple[int, int], _visited_
     # Отображаем все посещенные узлы
     visited_x = [pos[1] for pos in _visited_nodes]
     visited_y = [pos[0] for pos in _visited_nodes]
-    plt.scatter(visited_x, visited_y, color="green", s=10, label="Посещенные точки", zorder=3)
+    plt.scatter(visited_x, visited_y, color="red", s=10, label="Посещенные точки", zorder=3)
     plot_start_and_end(_start, _end)
 
     plt.legend()

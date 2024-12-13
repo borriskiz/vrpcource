@@ -10,11 +10,8 @@ path_length_cache = {}
 # Функция для маршрутизации методом полного перебора всех маршрутов с промежуточными точками
 def brute_force_routing(_start: Tuple[int, int], _points: List[Tuple[int, int]], _end: Tuple[int, int],
                         _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
-    # Объединяем начальную и конечную точку с точками маршрута
-    all_points = [_start] + _points + [_end]
-
     # Проверяем количество точек и предупреждаем, если их слишком много
-    if len(all_points) > 10:
+    if len(_points) > 10:
         print("Внимание! Число точек больше 10, алгоритм будет работать очень долго!")
 
     final_path = None
