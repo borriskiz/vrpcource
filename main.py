@@ -15,9 +15,9 @@ do_a_star_backward: bool = True
 
 # Параметры выполняемых опытов
 do_brute_force: bool = False
-do_nearest_neighbor: bool = False
-do_annealing: bool = False
-do_genetic: bool = False
+do_nearest_neighbor: bool = True
+do_annealing: bool = True
+do_genetic: bool = True
 
 # Параметры карты
 width: int = 512
@@ -94,12 +94,12 @@ if do_original:
 
 if do_a_star_forward:
     # Поиск маршрута от начала до конца
-    path_a_star_forward: List[Tuple[int, int]] = a_star_path(start, end, terrain_map)
+    path_a_star_forward: List[Tuple[int, int]] = a_star_path(start, end, terrain_map, True)
     visualize_route(path_a_star_forward, "A* start - end", start, [], end, terrain_map)
 
 if do_a_star_backward:
     # Поиск маршрута от конца до начала
-    path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map)
+    path_a_star_backward: List[Tuple[int, int]] = a_star_path(end, start, terrain_map, True)
     visualize_route(path_a_star_backward, "A* end - start", end, [], start, terrain_map)
 
 if do_brute_force:

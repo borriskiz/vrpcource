@@ -3,8 +3,7 @@ from map import plot_visited_nodes
 import heapq
 import numpy as np
 
-height_weight: float = 200
-show_visited_nodes: bool = True
+height_weight: float = 250
 
 
 # Функция для вычисления длины маршрута с учетом ландшафта
@@ -84,7 +83,8 @@ def calculate_height(_from: Tuple[int, int], _to: Tuple[int, int], _terrain_map:
 
 
 # Основная функция поиска пути с использованием A*
-def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.ndarray) -> List[Tuple[int, int]]:
+def a_star_path(start: Tuple[int, int], end: Tuple[int, int], _terrain_map: np.ndarray,
+                show_visited_nodes: bool = False) -> List[Tuple[int, int]]:
     open_list: List[Node] = []  # Очередь с приоритетами
     closed_set: set[Tuple[int, int]] = set()  # Множество посещенных узлов
     came_from: Dict[Tuple[int, int], Node] = {}  # Для восстановления пути

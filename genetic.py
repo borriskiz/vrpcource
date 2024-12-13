@@ -237,8 +237,8 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
         final_path.extend(segment[1:])
     final_path = [_start] + final_path  # Добавляем начальную точку в начало маршрута
 
-    print(f"Количество проверок путей: {path_check_count}")  # Выводим количество проверок путей
-    print(f"Количество просчитанных путей: {len(path_length_cache)}")
+    print(f"Количество проверок путей: {path_check_count}")
+    print(f"Количество реальных вычислений путей: {len(path_length_cache)}")
 
     path_cache.clear()
     path_length_cache.clear()
