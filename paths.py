@@ -11,8 +11,9 @@ def calculate_path_length(path: List[Tuple[int, int]], _terrain_map: np.ndarray)
     for j in range(len(path) - 1):
         x1, y1 = path[j]
         x2, y2 = path[j + 1]
-        terrain_cost = calculate_height((x1, y1), (x2, y2), _terrain_map)
-        length += heuristic((x1, y1), (x2, y2)) + terrain_cost
+        # terrain_cost = calculate_height((x1, y1), (x2, y2), _terrain_map)
+        # length += heuristic((x1, y1), (x2, y2), _terrain_map) + terrain_cost
+        length += heuristic((x1, y1), (x2, y2), _terrain_map)
     return length
 
 
@@ -66,8 +67,9 @@ class Node:
 
 
 # Эвристическая функция
-def heuristic(a: Tuple[int, int], b: Tuple[int, int]) -> float:
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+def heuristic(a: Tuple[int, int], b: Tuple[int, int], _terrain_map: np.ndarray) -> float:
+    # return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    return np.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + calculate_height(a, b, _terrain_map) ** 2)
 
 
 # Функция для вычисления длины маршрута с учетом ландшафта
@@ -84,10 +86,11 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
     came_from: dict[Tuple[int, int], Node] = {}  # Словарь для отслеживания пути
     g_costs: dict[Tuple[int, int], float] = {}  # Словарь для хранения g_cost узлов
 
-    start_node: Node = Node(_start, 0, heuristic(_start, _end))
+    start_node: Node = Node(_start, 0, heuristic(_start, _end, _terrain_map))
     heapq.heappush(open_list, start_node)
     g_costs[_start] = 0  # Начальная стоимость пути для старта
-    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    # directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]
 
     while open_list:
         current_node: Node = heapq.heappop(open_list)
@@ -97,6 +100,7 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
             while current_node:
                 path.append(current_node.position)
                 current_node = came_from.get(current_node.position)
+
             return path[::-1]
 
         closed_list.add(current_node.position)
@@ -109,7 +113,7 @@ def a_star_path(_start: Tuple[int, int], _end: Tuple[int, int], _terrain_map: np
 
                 # Вычисляем новые g_cost и h_cost
                 g_cost = current_node.g_cost + calculate_height(current_node.position, neighbor_pos, _terrain_map)
-                h_cost = heuristic(neighbor_pos, _end)
+                h_cost = heuristic(neighbor_pos, _end, _terrain_map)
 
                 # Проверяем, если этот сосед уже в открытом списке с более высокой стоимостью, пропускаем его
                 if neighbor_pos in g_costs and g_costs[neighbor_pos] <= g_cost:

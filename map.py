@@ -94,7 +94,7 @@ def generate_random_points(_start: Tuple[int, int], _end: Tuple[int, int], _num_
     return _points
 
 
-def plot_generation_data(generation_lengths: List[List[int]], average_lengths, min_lengths,
+def plot_generation_data(generation_lengths: List[List[float]], average_lengths, min_lengths,
                          _generations: int):
     plt.figure(figsize=(10, 6))
 
