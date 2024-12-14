@@ -71,7 +71,7 @@ if do_annealing:
                                                                         cooling_rate, iterations)
     path_length = round(calculate_path_length(path_annealing, terrain_map), 5)
 
-    visualize_route(path_annealing, path_length, "Алгоритм симулированного отжига", start, points, end, terrain_map)
+    visualize_route(path_annealing, path_length, "Алгоритм имитации отжига", start, points, end, terrain_map)
 
 if do_genetic:
     # Генетический поиск маршрута
