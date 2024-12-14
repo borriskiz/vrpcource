@@ -3,41 +3,51 @@ import random
 import numpy as np
 from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
 from map import plot_generation_data
+from settings import output_gene_crossover, output_gene_mutation, plot_graph_genetic
 
 path_cache = {}
 path_length_cache = {}
 
 # Счетчик проверок путей
 path_check_count: int = 0
-output_gene: bool = False
-plot_graph: bool = True
 
 
 # Мутация - инвертирование части отрезка
 def inverse_mutation(route: List[int]) -> List[int]:
+    if output_gene_mutation:
+        print(f"route before inverse mutation: {route}")
     mutated_route = route.copy()
     idx1, idx2 = sorted(random.sample(range(len(route)), 2))
     mutated_route[idx1:idx2 + 1] = reversed(mutated_route[idx1:idx2 + 1])
+    if output_gene_mutation:
+        print(f"route after inverse mutation: {mutated_route}")
     return mutated_route
 
 
 # Мутация - перемешивание части отрезка
 def scramble_mutation(route: List[int]) -> List[int]:
+    if output_gene_mutation:
+        print(f"route before scramble mutation: {route}")
     mutated_route = route.copy()
     idx1, idx2 = sorted(random.sample(range(len(route)), 2))
 
     sub_route = mutated_route[idx1:idx2 + 1]
     random.shuffle(sub_route)
     mutated_route[idx1:idx2 + 1] = sub_route
-
+    if output_gene_mutation:
+        print(f"route after scramble mutation: {mutated_route}")
     return mutated_route
 
 
 # Мутация - перестановка двух случайных элементов
 def swap_mutation(route: List[int]) -> List[int]:
+    if output_gene_mutation:
+        print(f"route before swap mutation: {route}")
     mutated_route = route.copy()
     idx1, idx2 = random.sample(range(len(route)), 2)
     mutated_route[idx1], mutated_route[idx2] = mutated_route[idx2], mutated_route[idx1]
+    if output_gene_mutation:
+        print(f"route after swap mutation: {mutated_route}")
     return mutated_route
 
 
@@ -62,9 +72,11 @@ def diversified_mutation(_route: List[int], _generation: int, _max_generations: 
 def pmx_crossover(parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
     size = len(parent1)
     start, end = sorted(random.sample(range(size), 2))
-    if output_gene:
+
+    if output_gene_crossover:
         print(f"parent1: {parent1}")
         print(f"parent2: {parent2}")
+
     # Создание двух детей
     child1 = [-1] * size
     child2 = [-1] * size
@@ -73,29 +85,37 @@ def pmx_crossover(parent1: List[int], parent2: List[int]) -> Tuple[List[int], Li
     for i in range(start, end + 1):
         child1[i] = parent1[i]
         child2[i] = parent2[i]
-    if output_gene:
-        print(f"child1: {child1}")
-        print(f"child2: {child2}")
 
-    # Заполнение оставшихся пустых мест в child1 и child2
+    if output_gene_crossover:
+        print(f"child1 (after part copy): {child1}")
+        print(f"child2 (after part copy): {child2}")
+
+    # Заполнение оставшихся пустых мест в child1
     for i in range(size):
         if child1[i] == -1:
-            for j in range(size):
-                if parent2[j] not in child1:
-                    child1[i] = parent2[j]
-                    break
+            # Пропускаем элементы, которые уже есть в перекопированной части
+            current_element = parent2[i]
+            while current_element in child1:  # Пропускаем элементы, которые уже есть в child1
+                idx = parent1.index(current_element)  # Ищем, где элемент находится в родителе 2
+                current_element = parent2[idx]  # Получаем элемент из второго родителя
+            child1[i] = current_element
+
+    # Заполнение оставшихся пустых мест в child2
+    for i in range(size):
         if child2[i] == -1:
-            for j in range(size):
-                if parent1[j] not in child2:
-                    child2[i] = parent1[j]
-                    break
+            current_element = parent1[i]
+            while current_element in child2:  # Пропускаем элементы, которые уже есть в child2
+                idx = parent2.index(current_element)  # Ищем, где элемент находится в родителе 1
+                current_element = parent1[idx]  # Получаем элемент из первого родителя
+            child2[i] = current_element
 
     # Проверка, что оба ребенка корректно заполнились
     if -1 in child1 or -1 in child2:
         raise ValueError("Не все позиции заполнены корректно.")
-    if output_gene:
-        print(f"child1: {child1}")
-        print(f"child2: {child2}")
+
+    if output_gene_crossover:
+        print(f"child1 (final): {child1}")
+        print(f"child2 (final): {child2}")
 
     return child1, child2
 
@@ -246,7 +266,7 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
     path_length_cache.clear()
 
     # Построение графика, если plot_graph == True
-    if plot_graph:
+    if plot_graph_genetic:
         plot_generation_data(generation_lengths, average_lengths, min_lengths, _generations)
 
     return final_path

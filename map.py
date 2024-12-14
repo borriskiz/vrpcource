@@ -135,6 +135,8 @@ def plot_generation_data(_generation_lengths, _average_lengths, _min_lengths,
     plt.legend()
     plt.grid(True)
     plt.show()
+
+
 def plot_annealing_data(_costs, _iterations: int):
     plt.figure(figsize=(10, 6))
 
@@ -147,6 +149,7 @@ def plot_annealing_data(_costs, _iterations: int):
     plt.legend()
     plt.grid(True)
     plt.show()
+
 
 def plot_visited_nodes(_start: Tuple[int, int], _end: Tuple[int, int], _visited_nodes: set[Tuple[int, int]],
                        _terrain_map: np.ndarray) -> None:

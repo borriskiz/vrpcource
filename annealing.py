@@ -4,13 +4,13 @@ from typing import List, Tuple
 import numpy as np
 from paths import get_path_from_cache_or_calculate, get_path_length_from_cache_or_calculate
 from map import plot_annealing_data
+from settings import plot_graph_annealing
 
 path_cache = {}
 path_length_cache = {}
 
 # Счетчики для подсчета проверок путей
 path_check_count = 0
-plot_graph: bool = True
 
 
 # Функция для генерации соседнего маршрута (изменение порядка промежуточных точек)
@@ -118,6 +118,6 @@ def simulated_annealing_routing(_start: Tuple[int, int], _points: List[Tuple[int
     path_length_cache.clear()
 
     # Строим график длины пути в зависимости от итерации
-    if plot_graph:
+    if plot_graph_annealing:
         plot_annealing_data(costs, len(costs))
     return final_path
