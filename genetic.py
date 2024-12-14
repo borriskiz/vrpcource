@@ -59,30 +59,45 @@ def diversified_mutation(_route: List[int], _generation: int, _max_generations: 
 
 
 # Partially Mapped Crossover (PMX)
-def pmx_crossover(parent1: List[int], parent2: List[int]) -> List[int]:
+def pmx_crossover(parent1: List[int], parent2: List[int]) -> Tuple[List[int], List[int]]:
     size = len(parent1)
     start, end = sorted(random.sample(range(size), 2))
-    child = [-1] * size
     if output_gene:
         print(f"parent1: {parent1}")
         print(f"parent2: {parent2}")
+    # Создание двух детей
+    child1 = [-1] * size
+    child2 = [-1] * size
+
+    # Копирование части отрезка от родителя 1 в child1, и от родителя 2 в child2
     for i in range(start, end + 1):
-        child[i] = parent1[i]
+        child1[i] = parent1[i]
+        child2[i] = parent2[i]
     if output_gene:
-        print(f"child: {child}")
+        print(f"child1: {child1}")
+        print(f"child2: {child2}")
+
+    # Заполнение оставшихся пустых мест в child1 и child2
     for i in range(size):
-        if child[i] == -1:
+        if child1[i] == -1:
             for j in range(size):
-                if parent2[j] not in child:
-                    child[i] = parent2[j]
+                if parent2[j] not in child1:
+                    child1[i] = parent2[j]
+                    break
+        if child2[i] == -1:
+            for j in range(size):
+                if parent1[j] not in child2:
+                    child2[i] = parent1[j]
                     break
 
-    if -1 in child:
+    # Проверка, что оба ребенка корректно заполнились
+    if -1 in child1 or -1 in child2:
         raise ValueError("Не все позиции заполнены корректно.")
-
     if output_gene:
-        print(f"child: {child}\n")
-    return child
+        print(f"child1: {child1}")
+        print(f"child2: {child2}")
+
+    return child1, child2
 
 
 # Турнирный отбор с агрессивным отбором лучших особей
@@ -188,19 +203,26 @@ def genetic_algorithm_routing(_start: Tuple[int, int], _points: List[Tuple[int, 
         # Создаем новую популяцию
         new_population = best_routes[:]
 
+        # Создание новой популяции с двумя детьми на каждой итерации
         while len(new_population) < _population_size:
             parent1 = adaptive_tournament_selection(best_routes, _terrain_map, generation, _generations,
                                                     _tournament_size, points)
             parent2 = adaptive_tournament_selection(best_routes, _terrain_map, generation, _generations,
                                                     _tournament_size, points)
 
-            child = pmx_crossover(parent1, parent2)
+            # Получаем два ребенка от кроссовера
+            child1, child2 = pmx_crossover(parent1, parent2)
 
+            # Применяем мутацию
             if random.random() < _mutation_rate:
-                child = diversified_mutation(child, generation, _generations)
+                child1 = diversified_mutation(child1, generation, _generations)
+                child2 = diversified_mutation(child2, generation, _generations)
 
-            if check_valid_route(child):
-                new_population.append(child)
+            # Добавляем детей в новую популяцию, если они корректны
+            if check_valid_route(child1):
+                new_population.append(child1)
+            if check_valid_route(child2):
+                new_population.append(child2)
 
         population = new_population
 
